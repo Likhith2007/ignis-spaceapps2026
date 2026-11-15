@@ -1,0 +1,111 @@
+{
+  "name": "IGNIS — RED Spike Instant Alert (n8n #2)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 15 }]
+        }
+      },
+      "id": "a1-sp-schedule",
+      "name": "Every 15 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-560, 0]
+    },
+    {
+      "parameters": {
+        "url": "=https://YOUR-IGNIS-DEPLOYMENT.vercel.app/api/hooks/digest",
+        "options": {
+          "headers": {
+            "header": [
+              { "name": "Authorization", "value": "=Bearer {{$env.IGNIS_HOOK_TOKEN}}" }
+            ]
+          }
+        }
+      },
+      "id": "a2-sp-fetch",
+      "name": "Fetch IGNIS digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-340, 0],
+      "notes": "Point at your deployment. Optional IGNIS_HOOK_TOKEN bearer (set as n8n env var) — the endpoint works without it too."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.alertRegions }}",
+              "rightValue": 0,
+              "operator": { "type": "array", "operation": "notEmpty", "singleValue": true }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3-sp-filter",
+      "name": "Any RED/escalated regions?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [-120, 0],
+      "notes": "The digest endpoint already applies the rule engine; alertRegions is non-empty only when a region crosses RED."
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $json;\nconst regions = (d.alertRegions || []).map(r => `- ${r.regionName ?? r.region ?? r}: ${r.level ?? 'RED'} — ${r.totalDetections ?? r.detections ?? '?'} detections · ${Math.round(r.totalFrpMW ?? r.frpMW ?? 0)} MW`).join('\\n');\nreturn [{\n  json: {\n    headline: d.headline || 'IGNIS RED spike detected',\n    body: `${d.headline || 'IGNIS RED spike'}\\n\\n${regions}\\n\\nCross-checked: ${d.gdacsCrossCheck ?? 'n/a'}\\nDashboard: https://ignis-spaceapps2026.vercel.app\\nGenerated: ${d.generatedAt ?? new Date().toISOString()}`\n  }\n}];"
+      },
+      "id": "a4-sp-format",
+      "name": "Format spike message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [100, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.IGNIS_ALERT_FROM || 'ignis-alerts@example.com' }}",
+        "toEmail": "={{ $env.IGNIS_ALERT_TO }}",
+        "subject": "=🔥 IGNIS RED SPIKE — immediate attention",
+        "text": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "a5-sp-email",
+      "name": "Send spike email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [320, -80],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.IGNIS_TELEGRAM_URL || 'https://api.telegram.org/bot<REPLACE-TOKEN>/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chat_id\": \"{{ $env.IGNIS_TELEGRAM_CHAT }}\", \"text\": {{ JSON.stringify($json.body) }}, \"disable_web_page_preview\": true}",
+        "options": {}
+      },
+      "id": "a6-sp-telegram",
+      "name": "Telegram spike ping",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 80],
+      "notes": "Replace <REPLACE-TOKEN> with your bot token or set IGNIS_TELEGRAM_URL env. Delete this node if Telegram is not wanted."
+    }
+  ],
+  "connections": {
+    "Every 15 min": { "main": [[{ "node": "Fetch IGNIS digest", "type": "main", "index": 0 }]] },
+    "Fetch IGNIS digest": { "main": [[{ "node": "Any RED/escalated regions?", "type": "main", "index": 0 }]] },
+    "Any RED/escalated regions?": { "main": [[{ "node": "Format spike message", "type": "main", "index": 0 }]] },
+    "Format spike message": { "main": [[{ "node": "Send spike email", "type": "main", "index": 0 }, { "node": "Telegram spike ping", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": {
+    "instanceId": "ignis-spaceapps-2026",
+    "description": "IGNIS workflow #2 — high-frequency RED-spike watch. Polls /api/hooks/digest every 15 minutes and immediately emails + Telegram-pings when any monitored region crosses the RED early-alert threshold. Companion to ignis-n8n-workflow.json (daily 21:00 UTC digest). Import into n8n: Workflows → Import from file. Set env vars: IGNIS_HOOK_TOKEN (optional), IGNIS_ALERT_TO, IGNIS_ALERT_FROM, IGNIS_TELEGRAM_URL, IGNIS_TELEGRAM_CHAT."
+  },
+  "tags": [{ "name": "ignis" }, { "name": "wildfire" }, { "name": "early-alert" }]
+}

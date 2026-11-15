@@ -1,0 +1,613 @@
+     1→'use client';
+     2→
+     3→import { useEffect, useMemo, useRef, useState } from 'react';
+     4→import * as maplibregl from 'maplibre-gl';
+     5→import 'maplibre-gl/dist/maplibre-gl.css';
+     6→import type { HotspotsResult, MultiHotspots, EonetRanked } from '@/lib/ignis/types';
+     7→import { SENSOR_COLORS, GIBS_BASEMAPS, GIBS_OVERLAYS, gibs3857Url, LST_RAMP } from '@/lib/ignis/regions';
+     8→
+     9→export type StyleMode = 'intensity' | 'sensor' | 'confidence' | 'heatmap';
+    10→
+    11→type Props = {
+    12→  bbox: number[];
+    13→  regionKey: string;
+    14→  day: string;
+    15→  hotspots: HotspotsResult | null;
+    16→  multiDay: MultiHotspots | null;
+    17→  pickMode: boolean;
+    18→  onPick: (bbox: number[]) => void;
+    19→  eonet: EonetRanked[];
+    20→  onAskAi: (q: string) => void;
+    21→};
+    22→
+    23→const FRP_RAMP: [number, string][] = [
+    24→  [0, '#FDE68A'], [10, '#FDBA74'], [25, '#FB923C'], [60, '#F87171'], [120, '#EF4444'], [250, '#B91C1C'], [500, '#7F1D1D'],
+    25→];
+    26→const CONF_RAMP: [number, string][] = [[0, '#475569'], [45, '#FBBF24'], [75, '#FB923C'], [90, '#F8FAFC']];
+    27→
+    28→const FRP_EXPR = ['interpolate', ['linear'], ['max', ['get', 'frp'], 0.5], ...FRP_RAMP.flat()] as unknown as maplibregl.ExpressionSpecification;
+    29→const SENSOR_EXPR = ['match', ['get', 'sensor'], ...Object.entries(SENSOR_COLORS).flat(), '#F97316'] as unknown as maplibregl.ExpressionSpecification;
+    30→const CONF_EXPR = ['interpolate', ['linear'], ['max', ['get', 'conf'], 0], ...CONF_RAMP.flat()] as unknown as maplibregl.ExpressionSpecification;
+    31→
+    32→function colorExpr(mode: StyleMode): maplibregl.ExpressionSpecification {
+    33→  if (mode === 'sensor') return SENSOR_EXPR;
+    34→  if (mode === 'confidence') return CONF_EXPR;
+    35→  return FRP_EXPR;
+    36→}
+    37→
+    38→function hexbin(points: { lon: number; lat: number; frp: number }[], bbox: number[]) {
+    39→  const span = Math.max(bbox[2] - bbox[0], bbox[3] - bbox[1]);
+    40→  const bin = Math.min(2, Math.max(0.25, +(span / 24).toFixed(2)));
+    41→  const map = new Map<string, { n: number; frp: number; lat: number; lon: number }>();
+    42→  for (const p of points) {
+    43→    const gx = Math.floor(p.lon / bin), gy = Math.floor(p.lat / bin);
+    44→    const k = `${gx},${gy}`;
+    45→    const g = map.get(k) || { n: 0, frp: 0, lat: (gy + 0.5) * bin, lon: (gx + 0.5) * bin };
+    46→    g.n++; g.frp += p.frp || 0;
+    47→    map.set(k, g);
+    48→  }
+    49→  const maxN = Math.max(1, ...[...map.values()].map((v) => v.n));
+    50→  return { bin, maxN, features: [...map.values()] };
+    51→}
+    52→
+    53→export default function MapPanel({ bbox, regionKey, day, hotspots, multiDay, pickMode, onPick, eonet, onAskAi }: Props) {
+    54→  const mapRef = useRef<maplibregl.Map | null>(null);
+    55→  const containerRef = useRef<HTMLDivElement>(null);
+    56→  const [ready, setReady] = useState(false);
+    57→  const [basemapKey, setBasemapKey] = useState('bands721');
+    58→  const [styleMode, setStyleMode] = useState<StyleMode>('intensity');
+    59→  const [overlays, setOverlays] = useState<Record<string, boolean>>({ coastlines: true, labels: false, lst_day: false, lst_night: false, gibsfires: false });
+    60→  const [showHex, setShowHex] = useState(false);
+    61→  const [visible, setVisible] = useState<Record<string, boolean>>({ 'MODIS-Terra': true, 'MODIS-Aqua': true, 'VIIRS-SNPP': true, 'VIIRS-NOAA20': true, 'VIIRS-NOAA21': true });
+    62→  const [animDay, setAnimDay] = useState<string | null>(null);
+    63→  const [playing, setPlaying] = useState(false);
+    64→  const [speed, setSpeed] = useState(900);
+    65→  const [hudDay, setHudDay] = useState(day);
+    66→
+    67→  const onPickRef = useRef(onPick);
+    68→  const pickRef = useRef(pickMode);
+    69→  const askRef = useRef(onAskAi);
+    70→  useEffect(() => { onPickRef.current = onPick; pickRef.current = pickMode; askRef.current = onAskAi; }, [onPick, pickMode, onAskAi]);
+    71→
+    72→  const dayKeys = useMemo(() => (multiDay ? Object.keys(multiDay.days).sort() : []), [multiDay]);
+    73→  const displayDay = animDay ?? day;
+    74→  const displayData = useMemo(
+    75→    () => (multiDay && multiDay.days[displayDay]) || hotspots,
+    76→    [multiDay, displayDay, hotspots],
+    77→  );
+    78→
+    79→  // ---- map init ----
+    80→  useEffect(() => {
+    81→    if (mapRef.current || !containerRef.current) return;
+    82→    const bm = GIBS_BASEMAPS[basemapKey];
+    83→    const map = new maplibregl.Map({
+    84→      container: containerRef.current,
+    85→      style: {
+    86→        version: 8,
+    87→        sources: {
+    88→          basemap: { type: 'raster', tiles: [gibs3857Url(bm, day)], tileSize: 256, maxzoom: bm.level, attribution: 'NASA GIBS' },
+    89→        },
+    90→        layers: [
+    91→          { id: 'bg', type: 'background', paint: { 'background-color': '#050A14' } },
+    92→          { id: 'basemap', type: 'raster', source: 'basemap', paint: { 'raster-opacity': 1 } },
+    93→        ],
+    94→      },
+    95→      center: [-60, -5],
+    96→      zoom: 3,
+    97→      attributionControl: false,
+    98→      doubleClickZoom: true,
+    99→    });
+   100→    // Quietly absorb GIBS tile hiccups (404 on empty vector tiles, transient 5xx) so the
+   101→    // browser console never spams AJAXError — layers already handle their own fallbacks.
+   102→    map.on('error', (e) => {
+   103→      const msg = e && e.error ? String((e.error as Error).message || e.error) : 'unknown';
+   104→      if (/AJAXError|Failed to fetch|tile|404|400|aborted/i.test(msg)) return;
+   105→      console.warn('[ignis:map]', msg);
+   106→    });
+   107→    map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right');
+   108→    map.addControl(new maplibregl.ScaleControl({ maxWidth: 110, unit: 'metric' }), 'bottom-left');
+   109→    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+   110→    map.on('load', () => {
+   111→      setReady(true);
+   112→      (window as unknown as { __ignisMap?: maplibregl.Map }).__ignisMap = map; // debug/demo handle
+   113→    });
+   114→    mapRef.current = map;
+   115→    return () => { map.remove(); mapRef.current = null; };
+   116→  }, []);
+   117→
+   118→  // ---- basemap + overlay sources ----
+   119→  useEffect(() => {
+   120→    const map = mapRef.current;
+   121→    if (!map || !ready) return;
+   122→    const bm = GIBS_BASEMAPS[basemapKey];
+   123→    const url = gibs3857Url(bm, displayDay);
+   124→    const src = map.getSource('basemap') as maplibregl.RasterTileSource | undefined;
+   125→    if (src) {
+   126→      // maxzoom must match the layer's TileMatrix level so MapLibre over-zooms instead of 404ing
+   127→      if ((src as unknown as { maxzoom?: number }).maxzoom === bm.level) {
+   128→        try { (src as unknown as { setTiles: (t: string[]) => void }).setTiles([url]); } catch { /* older API */ }
+   129→      } else {
+   130→        if (map.getLayer('basemap')) map.removeLayer('basemap');
+   131→        map.removeSource('basemap');
+   132→        map.addSource('basemap', { type: 'raster', tiles: [url], tileSize: 256, maxzoom: bm.level, attribution: 'NASA GIBS' });
+   133→        map.addLayer({ id: 'basemap', type: 'raster', source: 'basemap', paint: { 'raster-opacity': 1 } });
+   134→        if (map.getLayer('aoi-fill')) map.moveLayer('basemap', 'aoi-fill');
+   135→      }
+   136→    }
+   137→  }, [basemapKey, displayDay, ready]);
+   138→
+   139→  useEffect(() => {
+   140→    const map = mapRef.current;
+   141→    if (!map || !ready) return;
+   142→    for (const [key, cfg] of Object.entries(GIBS_OVERLAYS)) {
+   143→      const on = overlays[key];
+   144→      const srcId = `ov-${key}`, layerId = `ov-${key}`;
+   145→      if (on && !map.getSource(srcId)) {
+   146→        map.addSource(srcId, { type: 'raster', tiles: [gibs3857Url(cfg, displayDay)], tileSize: 256, maxzoom: cfg.level });
+   147→        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': key === 'labels' ? 0.9 : key.startsWith('lst') ? 0.6 : 0.75 } });
+   148→      } else if (on && map.getLayer(layerId)) {
+   149→        const s = map.getSource(srcId) as maplibregl.RasterTileSource;
+   150→        try { (s as unknown as { setTiles: (t: string[]) => void }).setTiles([gibs3857Url(cfg, displayDay)]); } catch { /* noop */ }
+   151→      } else if (!on && map.getLayer(layerId)) {
+   152→        map.removeLayer(layerId);
+   153→        map.removeSource(srcId);
+   154→      }
+   155→    }
+   156→  }, [overlays, displayDay, ready]);
+   157→
+   158→  // ---- GIBS fire pixels (vector cross-check) ----
+   159→  // GIBS serves thermal anomalies ONLY as Mapbox vector tiles (epsg4326 1km/500m TMS),
+   160→  // so the server parses them to GeoJSON (/api/gibsfires) — the old client-side raster
+   161→  // overlay (.png @ epsg3857) is a format GIBS does not provide and always returned 400.
+   162→  useEffect(() => {
+   163→    const map = mapRef.current;
+   164→    if (!map || !ready) return;
+   165→    if (!overlays.gibsfires) {
+   166→      for (const l of ['gibsfires-core', 'gibsfires-ring']) if (map.getLayer(l)) map.removeLayer(l);
+   167→      if (map.getSource('gibsfires')) map.removeSource('gibsfires');
+   168→      return;
+   169→    }
+   170→    let alive = true;
+   171→    (async () => {
+   172→      const [w, s, e, n] = bbox;
+   173→      const fc = await fetch(`/api/gibsfires?w=${w}&s=${s}&e=${e}&n=${n}&day=${displayDay}`)
+   174→        .then((r) => r.json()).catch(() => null);
+   175→      if (!alive || !map || !fc || fc.error) return;
+   176→      if (!map.getSource('gibsfires')) {
+   177→        map.addSource('gibsfires', { type: 'geojson', data: fc });
+   178→        const ring = {
+   179→          id: 'gibsfires-ring', type: 'circle' as const, source: 'gibsfires',
+   180→          paint: {
+   181→            'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, ['+', 1.8, ['*', 1.3, ['sqrt', ['max', ['get', 'frp'], 0.5]]]], 8, ['+', 4.5, ['*', 3.6, ['sqrt', ['max', ['get', 'frp'], 0.5]]]]],
+   182→            'circle-color': 'rgba(239,68,68,0.22)',
+   183→            'circle-stroke-color': '#F87171', 'circle-stroke-width': 1.1,
+   184→          },
+   185→        };
+   186→        const core = {
+   187→          id: 'gibsfires-core', type: 'circle' as const, source: 'gibsfires',
+   188→          paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.2, 8, 3.2], 'circle-color': '#FCA5A5', 'circle-stroke-color': '#FFFFFF', 'circle-stroke-width': 0.5 },
+   189→        };
+   190→        try { map.addLayer(ring, 'fires-glow'); map.addLayer(core, 'fires-glow'); }
+   191→        catch { map.addLayer(ring); map.addLayer(core); }
+   192→        map.on('click', 'gibsfires-core', (ev) => {
+   193→          const f = ev.features?.[0];
+   194→          if (!f) return;
+   195→          const p = f.properties as Record<string, string | number>;
+   196→          new maplibregl.Popup({ maxWidth: '260px' }).setLngLat(ev.lngLat).setHTML(
+   197→            `<div style="font:12px/1.5 ui-sans-serif"><div style="font-weight:700;color:#FCA5A5">🛰 GIBS fire pixel (cross-check)</div><div>${p.sensor} · FRP ${Number(p.frp).toFixed(1)} MW</div><div style="color:#94A3B8;margin-top:2px">Independent GIBS WMTS vector render — verifies the FIRMS NRT pipeline</div></div>`,
+   198→          ).addTo(map);
+   199→        });
+   200→      } else {
+   201→        (map.getSource('gibsfires') as maplibregl.GeoJSONSource).setData(fc);
+   202→      }
+   203→    })();
+   204→    return () => { alive = false; };
+   205→  }, [overlays.gibsfires, displayDay, bbox, ready]);
+   206→
+   207→  // ---- AOI box ----
+   208→  useEffect(() => {
+   209→    const map = mapRef.current;
+   210→    if (!map || !ready) return;
+   211→    const aoi = {
+   212→      type: 'FeatureCollection' as const,
+   213→      features: [{
+   214→        type: 'Feature' as const, properties: {},
+   215→        geometry: { type: 'Polygon' as const, coordinates: [[[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]], [bbox[0], bbox[1]]]] },
+   216→      }],
+   217→    };
+   218→    if (map.getSource('aoi')) (map.getSource('aoi') as maplibregl.GeoJSONSource).setData(aoi);
+   219→    else {
+   220→      map.addSource('aoi', { type: 'geojson', data: aoi });
+   221→      map.addLayer({ id: 'aoi-fill', type: 'fill', source: 'aoi', paint: { 'fill-color': '#38BDF8', 'fill-opacity': 0.05 } });
+   222→      map.addLayer({ id: 'aoi-line', type: 'fill', source: 'aoi', paint: { 'fill-color': '#38BDF8', 'fill-opacity': 0.0 } });
+   223→      map.addLayer({ id: 'aoi-stroke', type: 'line', source: 'aoi', paint: { 'line-color': '#38BDF8', 'line-width': 1.6, 'line-dasharray': [2, 2] } });
+   224→    }
+   225→    map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 40, duration: 900, maxZoom: 9 });
+   226→  }, [bbox, ready]);
+   227→
+   228→  // ---- EONET events ----
+   229→  useEffect(() => {
+   230→    const map = mapRef.current;
+   231→    if (!map || !ready) return;
+   232→    const fc = {
+   233→      type: 'FeatureCollection' as const,
+   234→      features: eonet.filter((e) => e.lat !== null).map((e) => ({
+   235→        type: 'Feature' as const,
+   236→        properties: { title: e.title, link: e.link, date: e.date, rel: e.relevance },
+   237→        geometry: { type: 'Point' as const, coordinates: [e.lon!, e.lat!] },
+   238→      })),
+   239→    };
+   240→    if (map.getSource('eonet')) (map.getSource('eonet') as maplibregl.GeoJSONSource).setData(fc);
+   241→    else {
+   242→      map.addSource('eonet', { type: 'geojson', data: fc });
+   243→      map.addLayer({
+   244→        id: 'eonet-ring', type: 'circle', source: 'eonet',
+   245→        paint: { 'circle-radius': 7, 'circle-color': 'rgba(56,189,248,0.12)', 'circle-stroke-color': '#38BDF8', 'circle-stroke-width': 1.6 },
+   246→      });
+   247→    }
+   248→  }, [eonet, ready]);
+   249→
+   250→  // ---- fire points ----
+   251→  useEffect(() => {
+   252→    const map = mapRef.current;
+   253→    if (!map || !ready) return;
+   254→    if (!displayData) return;
+   255→    const feats: Array<{ type: 'Feature'; properties: Record<string, string | number>; geometry: { type: 'Point'; coordinates: [number, number] } }> = [];
+   256→    for (const [sensor, s] of Object.entries(displayData.sensors)) {
+   257→      if (!visible[sensor]) continue;
+   258→      for (const p of s.points) {
+   259→        feats.push({
+   260→          type: 'Feature' as const,
+   261→          properties: {
+   262→            sensor, frp: Math.min(600, Math.max(0.5, p.frp || 0.5)),
+   263→            conf: typeof p.conf === 'number' ? p.conf : 60,
+   264→            night: p.night ? 'N' : 'D', sat: p.sat || '', acq: p.acq || '',
+   265→          },
+   266→          geometry: { type: 'Point' as const, coordinates: [p.lon, p.lat] },
+   267→        });
+   268→      }
+   269→    }
+   270→    const fc = { type: 'FeatureCollection' as const, features: feats };
+   271→    if (map.getSource('fires')) (map.getSource('fires') as maplibregl.GeoJSONSource).setData(fc);
+   272→    else {
+   273→      map.addSource('fires', { type: 'geojson', data: fc });
+   274→      map.addLayer({
+   275→        id: 'fires-heat', type: 'heatmap', source: 'fires', layout: { visibility: 'none' },
+   276→        paint: {
+   277→          'heatmap-weight': ['interpolate', ['linear'], ['get', 'frp'], 0.5, 0.25, 300, 1.4],
+   278→          'heatmap-intensity': 0.7,
+   279→          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 1, 12, 8, 38],
+   280→          'heatmap-opacity': 0.85,
+   281→          'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
+   282→            0, 'rgba(5,10,20,0)', 0.2, '#1D4ED8', 0.4, '#0891B2', 0.55, '#FDE047', 0.75, '#F97316', 0.9, '#DC2626', 1, '#FECACA'],
+   283→        },
+   284→      });
+   285→      map.addLayer({
+   286→        id: 'fires-glow', type: 'circle', source: 'fires',
+   287→        paint: { 'circle-color': colorExpr('intensity'), 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, ['+', 2, ['*', 1.6, ['sqrt', ['get', 'frp']]]], 8, ['+', 7, ['*', 6, ['sqrt', ['get', 'frp']]]]], 'circle-blur': 1.1, 'circle-opacity': 0.5 },
+   288→      });
+   289→      map.addLayer({
+   290→        id: 'fires-core', type: 'circle', source: 'fires',
+   291→        paint: { 'circle-color': FRP_EXPR, 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, ['+', 1.4, ['*', 1.1, ['sqrt', ['get', 'frp']]]], 8, ['+', 3.4, ['*', 3.6, ['sqrt', ['get', 'frp']]]]], 'circle-stroke-width': 0.5, 'circle-stroke-color': 'rgba(255,255,255,0.4)' },
+   292→      });
+   293→      map.addLayer({
+   294→        id: 'fires-hot', type: 'circle', source: 'fires', filter: ['>=', ['get', 'frp'], 150],
+   295→        paint: { 'circle-color': '#FFFFFF', 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1.6, 8, 5], 'circle-opacity': 0.95 },
+   296→      });
+   297→      // popups
+   298→      map.on('click', 'fires-core', (e) => {
+   299→        const f = e.features?.[0];
+   300→        if (!f) return;
+   301→        const p = f.properties as Record<string, string | number>;
+   302→        const html = `<div style="font:12px/1.5 ui-sans-serif,system-ui">
+   303→          <div style="font-weight:700;color:#FDBA74;margin-bottom:2px">🔥 Active fire detection</div>
+   304→          <div><b>${p.sensor}</b>${p.sat ? ` · satellite ${p.sat}` : ''}</div>
+   305→          <div>FRP <b>${Number(p.frp).toFixed(1)} MW</b> · confidence <b>${p.conf}</b></div>
+   306→          <div>${p.acq ? `${p.acq} · ` : ''}${p.night === 'N' ? 'night overpass' : 'day overpass'}</div>
+   307→          <div style="color:#94A3B8">${f.geometry.type === 'Point' ? (f.geometry as unknown as { coordinates: [number, number] }).coordinates.map((c) => c.toFixed(3)).join(', ') : ''}</div>
+   308→          <button class="ignis-ask" style="margin-top:6px;background:#38BDF8;color:#050A14;border:0;border-radius:6px;padding:4px 10px;font-weight:700;cursor:pointer;font-size:11px">✦ Ask IGNIS AI about this</button>
+   309→        </div>`;
+   310→        const popup = new maplibregl.Popup({ closeButton: true, maxWidth: '280px' }).setLngLat(e.lngLat).setHTML(html).addTo(map);
+   311→        setTimeout(() => {
+   312→          popup.getElement().querySelector('.ignis-ask')?.addEventListener('click', () => {
+   313→            askRef.current(`Explain this fire detection at ${(f.geometry as unknown as { coordinates: [number, number] }).coordinates.map((c) => c.toFixed(2)).join(', ')} on ${displayDay}: sensor ${p.sensor}, FRP ${Number(p.frp).toFixed(1)} MW, confidence ${p.conf}, ${p.night === 'N' ? 'night' : 'day'} overpass. What does it mean for the ${regionKey} AOI and what should responders watch?`);
+   314→            popup.remove();
+   315→          });
+   316→        }, 50);
+   317→      });
+   318→      map.on('mouseenter', 'fires-core', () => { map.getCanvas().style.cursor = 'pointer'; });
+   319→      map.on('mouseleave', 'fires-core', () => { map.getCanvas().style.cursor = pickRef.current ? 'crosshair' : ''; });
+   320→    }
+   321→    // style mode updates
+   322→    const colorForMode = colorExpr(styleMode);
+   323→    map.setPaintProperty('fires-glow', 'circle-color', colorExpr('intensity'));
+   324→    map.setPaintProperty('fires-core', 'circle-color', colorForMode);
+   325→    map.setLayoutProperty('fires-heat', 'visibility', styleMode === 'heatmap' ? 'visible' : 'none');
+   326→    map.setLayoutProperty('fires-glow', 'visibility', styleMode === 'heatmap' ? 'none' : 'visible');
+   327→    map.setLayoutProperty('fires-core', 'visibility', styleMode === 'heatmap' ? 'none' : 'visible');
+   328→    map.setLayoutProperty('fires-hot', 'visibility', styleMode === 'heatmap' ? 'none' : 'visible');
+   329→    const visList = Object.keys(visible).filter((k) => visible[k]);
+   330→    const filter = ['in', ['get', 'sensor'], ['literal', visList]] as unknown as maplibregl.FilterSpecification;
+   331→    ['fires-heat', 'fires-glow', 'fires-core', 'fires-hot'].forEach((l) => map.setFilter(l, filter));
+   332→  }, [displayData, ready, styleMode, visible, displayDay, regionKey]);
+   333→
+   334→  // ---- hexbin ----
+   335→  useEffect(() => {
+   336→    const map = mapRef.current;
+   337→    if (!map || !ready) return;
+   338→    if (!displayData) return;
+   339→    const pts = Object.entries(displayData.sensors).flatMap(([sensor, s]) => (visible[sensor] ? s.points : []));
+   340→    const { bin, maxN, features } = hexbin(pts, bbox);
+   341→    const fc = {
+   342→      type: 'FeatureCollection' as const,
+   343→      features: features.map((g) => ({
+   344→        type: 'Feature' as const,
+   345→        properties: { n: g.n, frp: Math.round(g.frp), t: g.n / maxN },
+   346→        geometry: { type: 'Polygon' as const, coordinates: [[[g.lon - bin / 2, g.lat - bin / 2], [g.lon + bin / 2, g.lat - bin / 2], [g.lon + bin / 2, g.lat + bin / 2], [g.lon - bin / 2, g.lat + bin / 2], [g.lon - bin / 2, g.lat - bin / 2]]] },
+   347→      })),
+   348→    };
+   349→    if (map.getSource('hex')) (map.getSource('hex') as maplibregl.GeoJSONSource).setData(fc);
+   350→    else {
+   351→      map.addSource('hex', { type: 'geojson', data: fc });
+   352→      map.addLayer({
+   353→        id: 'hex-fill', type: 'fill', source: 'hex', layout: { visibility: 'none' },
+   354→        paint: { 'fill-color': ['interpolate', ['linear'], ['get', 't'], 0, 'rgba(253,224,71,0.25)', 0.4, 'rgba(249,115,22,0.45)', 1, 'rgba(185,28,28,0.65)'] },
+   355→      });
+   356→      map.addLayer({
+   357→        id: 'hex-line', type: 'line', source: 'hex', layout: { visibility: 'none' },
+   358→        paint: { 'line-color': 'rgba(251,146,60,0.35)', 'line-width': 0.6 },
+   359→      });
+   360→      map.on('click', 'hex-fill', (e) => {
+   361→        const f = e.features?.[0];
+   362→        if (!f) return;
+   363→        const p = f.properties as Record<string, number>;
+   364→        new maplibregl.Popup({ maxWidth: '220px' }).setLngLat(e.lngLat).setHTML(
+   365→          `<div style="font:12px/1.5 ui-sans-serif"><b>${p.n} detections</b> in this ${bin}° cell<br>Σ FRP ${p.frp} MW<div style="color:#94A3B8;margin-top:2px">Hexbin aggregation of harmonized hotspots</div></div>`,
+   366→        ).addTo(map);
+   367→      });
+   368→    }
+   369→    map.setLayoutProperty('hex-fill', 'visibility', showHex ? 'visible' : 'none');
+   370→    map.setLayoutProperty('hex-line', 'visibility', showHex ? 'visible' : 'none');
+   371→  }, [displayData, showHex, bbox, ready, visible]);
+   372→
+   373→  // ---- AOI interactions: click-pick + shift-drag ----
+   374→  useEffect(() => {
+   375→    const map = mapRef.current;
+   376→    if (!map || !ready) return;
+   377→    let start: maplibregl.LngLat | null = null;
+   378→    let box: HTMLDivElement | null = null;
+   379→
+   380→    const down = (e: maplibregl.MapMouseEvent) => {
+   381→      if (!e.originalEvent.shiftKey || pickRef.current) return;
+   382→      start = e.lngLat;
+   383→      map.dragPan.disable();
+   384→      box = document.createElement('div');
+   385→      box.style.cssText = 'position:absolute;border:1.5px dashed #38BDF8;background:rgba(56,189,248,0.08);pointer-events:none;z-index:20';
+   386→      map.getContainer().appendChild(box);
+   387→    };
+   388→    const move = (e: maplibregl.MapMouseEvent) => {
+   389→      if (!start || !box) return;
+   390→      const minX = Math.min(start.lng, e.lngLat.lng), maxX = Math.max(start.lng, e.lngLat.lng);
+   391→      const minY = Math.min(start.lat, e.lngLat.lat), maxY = Math.max(start.lat, e.lngLat.lat);
+   392→      const p1 = map.project([minX, maxY]), p2 = map.project([maxX, minY]);
+   393→      box.style.left = `${p1.x}px`; box.style.top = `${p1.y}px`;
+   394→      box.style.width = `${p2.x - p1.x}px`; box.style.height = `${p2.y - p1.y}px`;
+   395→      (box as unknown as { _bbox: number[] })._bbox = [minX, minY, maxX, maxY];
+   396→    };
+   397→    const up = () => {
+   398→      if (!start || !box) return;
+   399→      const b = (box as unknown as { _bbox?: number[] })._bbox;
+   400→      box.remove(); box = null;
+   401→      map.dragPan.enable();
+   402→      start = null;
+   403→      if (b && Math.abs(b[2] - b[0]) > 0.5 && Math.abs(b[3] - b[1]) > 0.5) onPickRef.current(b.map((v) => +v.toFixed(2)));
+   404→    };
+   405→    map.on('mousedown', down);
+   406→    map.on('mousemove', move);
+   407→    map.on('mouseup', up);
+   408→
+   409→    const click = (e: maplibregl.MapMouseEvent) => {
+   410→      if (!pickRef.current) return;
+   411→      const { lng, lat } = e.lngLat;
+   412→      onPickRef.current([+(lng - 2.25).toFixed(2), +(lat - 2).toFixed(2), +(lng + 2.25).toFixed(2), +(lat + 2).toFixed(2)]);
+   413→    };
+   414→    map.on('click', click);
+   415→
+   416→    map.on('click', 'eonet-ring', (e) => {
+   417→      const f = e.features?.[0];
+   418→      if (!f) return;
+   419→      const p = f.properties as Record<string, string>;
+   420→      new maplibregl.Popup({ maxWidth: '260px' }).setLngLat(e.lngLat).setHTML(
+   421→        `<div style="font:12px/1.5 ui-sans-serif"><div style="font-weight:700;color:#7DD3FC">🌐 EONET wildfire event</div><div>${p.title}</div><div style="color:#94A3B8">${p.date?.slice(0, 10)}</div><a href="${p.link}" target="_blank" rel="noreferrer" style="color:#38BDF8">NASA EONET details →</a></div>`,
+   422→      ).addTo(map);
+   423→    });
+   424→
+   425→    return () => { map.off('mousedown', down); map.off('mousemove', move); map.off('mouseup', up); map.off('click', click); };
+   426→  }, [ready]);
+   427→
+   428→  // ---- animation playback ----
+   429→  useEffect(() => {
+   430→    if (!playing || !dayKeys.length) return;
+   431→    const idx = animDay ? dayKeys.indexOf(animDay) : -1;
+   432→    const t = setTimeout(() => {
+   433→      const next = dayKeys[(idx + 1) % dayKeys.length];
+   434→      setAnimDay(next);
+   435→      setHudDay(next);
+   436→    }, speed);
+   437→    return () => clearTimeout(t);
+   438→  }, [playing, animDay, dayKeys, speed]);
+   439→
+   440→  // reset animation when the selected day changes (React "adjust state during render" pattern)
+   441→  const [prevDay, setPrevDay] = useState(day);
+   442→  if (prevDay !== day) {
+   443→    setPrevDay(day);
+   444→    setHudDay(day);
+   445→    setAnimDay(null);
+   446→    setPlaying(false);
+   447→  }
+   448→
+   449→  const stats = useMemo(() => {
+   450→    if (!displayData) return null;
+   451→    let count = 0, frpSum = 0, hi = 0, night = 0, maxFrp = 0;
+   452→    for (const [k, s] of Object.entries(displayData.sensors)) {
+   453→      if (!visible[k]) continue;
+   454→      count += s.count; frpSum += s.points.reduce((a, p) => a + (p.frp || 0), 0);
+   455→      hi += s.hiConf; night += Math.round((s.nightPct / 100) * s.count);
+   456→      maxFrp = Math.max(maxFrp, s.maxFrp);
+   457→    }
+   458→    return { count, meanFrp: count ? frpSum / count : 0, hiPct: count ? (hi / count) * 100 : 0, nightPct: count ? (night / count) * 100 : 0, maxFrp };
+   459→  }, [displayData, visible]);
+   460→
+   461→  const perSensor = useMemo(() => {
+   462→    const m: Record<string, number> = {};
+   463→    if (displayData) for (const [k, s] of Object.entries(displayData.sensors)) m[k] = s.count;
+   464→    return m;
+   465→  }, [displayData]);
+   466→
+   467→  const playIdx = animDay ? Math.max(0, dayKeys.indexOf(animDay)) : 0;
+   468→
+   469→  const bm = GIBS_BASEMAPS[basemapKey];
+   470→
+   471→  return (
+   472→    <div className="relative h-full w-full overflow-hidden rounded-xl border border-[#14273F]">
+   473→      <div ref={containerRef} className={`h-full w-full ${pickMode ? 'cursor-crosshair' : ''}`} />
+   474→
+   475→      {/* Top-left HUD */}
+   476→      <div className="pointer-events-none absolute left-3 top-3 z-10 flex max-w-[290px] flex-col gap-1.5 rounded-lg border border-[#14273F] bg-[#050A14]/88 px-3 py-2.5 text-[11px] leading-4 text-slate-300 backdrop-blur">
+   477→        <div className="flex items-center justify-between gap-2">
+   478→          <span className="font-semibold tracking-wide text-slate-100">ACTIVE FIRE DETECTIONS</span>
+   479→          <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${displayData?.source === 'firms-api' ? 'bg-emerald-900/70 text-emerald-300' : displayData?.source === 'mixed' ? 'bg-amber-900/70 text-amber-300' : 'bg-sky-900/70 text-sky-300'}`}>
+   480→            {displayData?.source === 'firms-api' ? 'FIRMS LIVE' : displayData?.source === 'mixed' ? 'FIRMS+GIBS' : 'GIBS MVT'}
+   481→          </span>
+   482→        </div>
+   483→        <div className="font-mono text-[15px] font-bold text-orange-300">{stats ? stats.count.toLocaleString() : '—'} <span className="text-[10px] font-normal text-slate-400">detections · {hudDay}</span></div>
+   484→        {stats && (
+   485→          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-slate-400">
+   486→            <span>mean FRP <b className="text-slate-200">{stats.meanFrp.toFixed(1)} MW</b></span>
+   487→            <span>max FRP <b className="text-slate-200">{stats.maxFrp.toFixed(0)} MW</b></span>
+   488→            <span>hi-conf <b className="text-slate-200">{stats.hiPct.toFixed(0)}%</b></span>
+   489→            <span>night <b className="text-slate-200">{stats.nightPct.toFixed(0)}%</b></span>
+   490→          </div>
+   491→        )}
+   492→        <div className="flex flex-wrap gap-1 pt-0.5">
+   493→          {Object.keys(SENSOR_COLORS).map((k) => (
+   494→            <button key={k} onClick={() => setVisible((v) => ({ ...v, [k]: !v[k] }))}
+   495→              title={`${k}: ${perSensor[k]?.toLocaleString() ?? 0} detections`}
+   496→              className={`pointer-events-auto flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] transition-opacity ${visible[k] ? 'border-[#1E3A5F]' : 'border-[#1E3A5F] opacity-35'}`}>
+   497→              <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: SENSOR_COLORS[k] }} />{k.replace('VIIRS-', 'V-')}{perSensor[k] ? <b className="font-mono text-[8.5px] text-slate-400">{perSensor[k] > 999 ? `${(perSensor[k] / 1000).toFixed(1)}k` : perSensor[k]}</b> : null}
+   498→            </button>
+   499→          ))}
+   500→        </div>
+   501→      </div>
+   502→
+   503→      {/* Right controls */}
+   504→      <div className="absolute right-3 top-16 z-10 flex flex-col items-end gap-1.5 text-[10.5px]">
+   505→        <select value={basemapKey} onChange={(e) => setBasemapKey(e.target.value)}
+   506→          className="rounded border border-[#1E3A5F] bg-[#050A14]/90 px-2 py-1.5 text-[10.5px] text-slate-200 backdrop-blur outline-none">
+   507→          {Object.entries(GIBS_BASEMAPS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+   508→        </select>
+   509→        <div className="flex overflow-hidden rounded border border-[#1E3A5F] bg-[#050A14]/90 backdrop-blur">
+   510→          {(['intensity', 'sensor', 'confidence', 'heatmap'] as StyleMode[]).map((m) => (
+   511→            <button key={m} onClick={() => setStyleMode(m)} className={`px-2 py-1.5 capitalize ${styleMode === m ? 'bg-[#38BDF8] text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}>{m}</button>
+   512→          ))}
+   513→        </div>
+   514→        <div className="flex flex-wrap justify-end gap-1">
+   515→          {Object.entries(GIBS_OVERLAYS).map(([k, v]) => (
+   516→            <button key={k} onClick={() => setOverlays((o) => ({ ...o, [k]: !o[k] }))}
+   517→              title={v.note}
+   518→              className={`rounded border px-1.5 py-1 backdrop-blur transition-colors ${overlays[k] ? 'border-[#38BDF8] bg-[#38BDF8]/20 text-[#7DD3FC]' : 'border-[#1E3A5F] bg-[#050A14]/80 text-slate-400'}`}>
+   519→              {v.label.split('(')[0].trim()}
+   520→            </button>
+   521→          ))}
+   522→          <button onClick={() => setOverlays((o) => ({ ...o, gibsfires: !o.gibsfires }))}
+   523→            title="GIBS WMTS vector fire pixels — independent cross-check of the FIRMS NRT pipeline"
+   524→            className={`rounded border px-1.5 py-1 backdrop-blur transition-colors ${overlays.gibsfires ? 'border-[#F87171] bg-[#EF4444]/20 text-[#FCA5A5]' : 'border-[#1E3A5F] bg-[#050A14]/80 text-slate-400'}`}>
+   525→            GIBS fire pixels
+   526→          </button>
+   527→          <button onClick={() => setShowHex((h) => !h)}
+   528→            className={`rounded border px-1.5 py-1 backdrop-blur transition-colors ${showHex ? 'border-[#38BDF8] bg-[#38BDF8]/20 text-[#7DD3FC]' : 'border-[#1E3A5F] bg-[#050A14]/80 text-slate-400'}`}>
+   529→            Hexbin density
+   530→          </button>
+   531→        </div>
+   532→        {dayKeys.length > 1 && (
+   533→          <div className="pointer-events-none w-44 rounded border border-[#14273F] bg-[#050A14]/85 px-2 py-1.5 backdrop-blur">
+   534→            <button onClick={() => setPlaying((p) => !p)}
+   535→              className={`pointer-events-auto mb-1 w-full rounded border px-2.5 py-1.5 font-bold ${playing ? 'border-orange-400 bg-orange-500/20 text-orange-300' : 'border-[#38BDF8] bg-[#38BDF8]/15 text-[#7DD3FC]'}`}>
+   536→              {playing ? '❚❚ Pause replay' : `▶ Replay ${dayKeys.length} days`}
+   537→            </button>
+   538→            <div className="h-1 w-full overflow-hidden rounded bg-[#0F1D31]">
+   539→              <div className="h-1 rounded bg-orange-400 transition-all" style={{ width: `${((playIdx + 1) / dayKeys.length) * 100}%` }} />
+   540→            </div>
+   541→            <div className="mt-0.5 flex items-center justify-between text-[9px] text-slate-500">
+   542→              <span>{playIdx + 1}/{dayKeys.length} · {animDay ?? day}</span>
+   543→              <button onClick={() => setSpeed((sp) => (sp === 1600 ? 900 : sp === 900 ? 450 : 1600))}
+   544→                className="pointer-events-auto rounded px-1 text-[#7DD3FC] hover:bg-[#0F1D31]" title="replay speed">
+   545→                {(speed / 1000).toFixed(speed % 1000 !== 0 ? 1 : 0)}s/day
+   546→              </button>
+   547→            </div>
+   548→          </div>
+   549→        )}
+   550→      </div>
+   551→
+   552→      {/* Legend */}
+   553→      <div className="pointer-events-none absolute bottom-10 left-3 z-10 rounded-lg border border-[#14273F] bg-[#050A14]/88 px-3 py-2 text-[10px] text-slate-300 backdrop-blur">
+   554→        {styleMode === 'heatmap' ? (
+   555→          <>
+   556→            <div className="mb-1 font-semibold text-slate-200">Detection density (FRP-weighted)</div>
+   557→            <div className="h-2 w-40 rounded" style={{ backgroundImage: 'linear-gradient(90deg,#1D4ED8,#0891B2,#FDE047,#F97316,#DC2626,#FECACA)' }} />
+   558→            <div className="mt-0.5 flex w-40 justify-between text-[9px] text-slate-500"><span>sparse</span><span>dense</span></div>
+   559→          </>
+   560→        ) : styleMode === 'sensor' ? (
+   561→          <>
+   562→            <div className="mb-1 font-semibold text-slate-200">Sensor · size = FRP</div>
+   563→            <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+   564→              {Object.entries(SENSOR_COLORS).map(([k, c]) => (
+   565→                <span key={k} className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: c }} />{k}</span>
+   566→              ))}
+   567→            </div>
+   568→          </>
+   569→        ) : styleMode === 'confidence' ? (
+   570→          <>
+   571→            <div className="mb-1 font-semibold text-slate-200">Detection confidence</div>
+   572→            <div className="h-2 w-40 rounded" style={{ backgroundImage: `linear-gradient(90deg,${CONF_RAMP.map(([v, c]) => `${c} ${(v / 90) * 100}%`).join(',')})` }} />
+   573→            <div className="mt-0.5 flex w-40 justify-between text-[9px] text-slate-500"><span>0 (VIIRS low ≈30)</span><span>90+</span></div>
+   574→          </>
+   575→        ) : (
+   576→          <>
+   577→            <div className="mb-1 font-semibold text-slate-200">Fire radiative power (MW)</div>
+   578→            <div className="h-2 w-40 rounded" style={{ backgroundImage: `linear-gradient(90deg,${FRP_RAMP.map(([v, c]) => `${c} ${(Math.log10(1 + v) / Math.log10(501)) * 100}%`).join(',')})` }} />
+   579→            <div className="mt-0.5 flex w-40 justify-between text-[9px] text-slate-500"><span>0</span><span>25</span><span>120</span><span>500+</span></div>
+   580→            <div className="mt-1 text-[9px] text-slate-500">white core = FRP ≥ 150 MW · radius ∝ √FRP</div>
+   581→          </>
+   582→        )}
+   583→        {(overlays.lst_day || overlays.lst_night) && (
+   584→          <>
+   585→            <div className="mb-1 mt-2 font-semibold text-slate-200">Land surface temperature (MOD11, °C)</div>
+   586→            <div className="h-2 w-40 rounded" style={{ backgroundImage: `linear-gradient(90deg,${LST_RAMP.map(([, c]) => c).join(',')})` }} />
+   587→            <div className="mt-0.5 flex w-40 justify-between text-[9px] text-slate-500"><span>-25°</span><span>0°</span><span>25°</span><span>50°+</span></div>
+   588→            <div className="mt-1 text-[9px] text-slate-500">LP DAAC MOD11: K = raw × 0.02 · ε = raw × 0.02 + 0.49 · fill = 0</div>
+   589→          </>
+   590→        )}
+   591→        {overlays.gibsfires && (
+   592→          <div className="mt-1 flex items-center gap-1 text-[9px] text-slate-500">
+   593→            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: '#FCA5A5' }} />
+   594→            GIBS fire pixels = independent cross-check of FIRMS
+   595→          </div>
+   596→        )}
+   597→        <div className="mt-1 text-[9px] text-slate-500">basemap: {bm.label}{bm.daily ? ` · ${displayDay}` : ''}</div>
+   598→      </div>
+   599→
+   600→      {pickMode && (
+   601→        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-lg border border-cyan-500/40 bg-cyan-950/80 px-3 py-1.5 text-[11px] text-cyan-200 backdrop-blur">
+   602→          AOI pick mode — click anywhere to define a ±2° box (or hold Shift and drag to draw any rectangle)
+   603→        </div>
+   604→      )}
+   605→      {!pickMode && (
+   606→        <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded border border-[#14273F] bg-[#050A14]/70 px-2 py-1 text-[9.5px] text-slate-500 backdrop-blur">
+   607→          Shift + drag to draw a custom AOI · click a hotspot for details
+   608→        </div>
+   609→      )}
+   610→    </div>
+   611→  );
+   612→}
+   613→

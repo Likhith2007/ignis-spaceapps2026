@@ -1,0 +1,160 @@
+
+  <!-- 05 -->
+  <div class="chapter-header">
+    <div class="sec-tag">05 · Early warning</div>
+    <div class="sec-title">The right-hand rail</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">The rail answers one question continuously: <b>is anything about to get
+  worse?</b> It stacks four live feeds plus the fire-weather verdict, and every one of them
+  degrades silently to the deterministic core if its source is unreachable.</p>
+  <div class="grid2">
+    <div class="card"><div class="c-title">Rule-engine early warning</div>
+      <p>Zero-latency, deterministic threat assessment of live detections — no LLM anywhere in the
+      path. It drives the same LOW → EXTREME badge vocabulary used on the map and in event cards,
+      so a responder sees one consistent scale across the whole console.</p></div>
+    <div class="card"><div class="c-title">EONET · ranked on-device</div>
+      <p>NASA EONET open wildfire events ranked by <b>all-MiniLM-L6-v2 running in the browser</b>
+      (transformers.js/ONNX) for semantic relevance, then geo-filtered to the current AOI. The
+      ranking model is local, so triage survives any server outage.</p></div>
+    <div class="card"><div class="c-title">GDACS authority alerts</div>
+      <p>European Commission / JRC Global Disaster Alert and Coordination System wildfire alerts —
+      GREEN / ORANGE / RED levels with severity in hectares, filtered to the region of interest.</p></div>
+    <div class="card"><div class="c-title">ReliefWeb · UN OCHA</div>
+      <p>On-the-ground disaster reports from the UN's humanitarian news service, wildfire-first
+      with honest context labeling when a report is merely adjacent to fire activity.</p></div>
+  </div>
+  <p class="body-text">Below the feeds sits the <b>7-day fire-weather early warning</b> card: an
+  Open-Meteo composite of wind, humidity and precipitation trend for the AOI, resolved to a
+  color-banded verdict label. In expert mode the rail also shows the <b>Sensor Harmonization</b>
+  card — per-sensor counts and the live VIIRS/MODIS ratio for the selected day, the harmonization
+  problem made observable in real time.</p>
+
+  <!-- 06 -->
+  <div class="chapter-header">
+    <div class="sec-tag">06 · Intelligence</div>
+    <div class="sec-title">IGNIS AI Analyst</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">A chat drawer plus automatic situation reports, grounded <b>strictly in live
+  telemetry</b>: every prompt is built from the same API documents the panels render, so the model
+  cannot invent numbers — it is instructed to cite only the telemetry in context and to refuse
+  anything else. Two modes cover two jobs: <b>chat</b> ("is the Xingu basin active this week?") and
+  <b>sitrep</b>, an incident-style situation report covering activity, trend, dominant sensor, risk
+  outlook and recommended actions.</p>
+  <p class="body-text">The conversational layer runs <b>Llama-3.1-8B</b> through the Hugging Face
+  inference router with a zero-hallucination guard. If the endpoint is down or out of credits, a
+  deterministic rule engine composes <i>the same SITREP structure</i> offline — the feature never
+  dead-ends. The honesty contract is explicit in the UI: when the model speaks, the panel shows
+  the model card; when the rule engine speaks, it says so. MiniLM triage (section 05) is the local
+  component of the AI layer, so even with all remote AI down, ranking and the core analysis stay up.</p>
+  <div class="note"><b>Design rule:</b> LLMs decorate, they never decide. Segmentation, analytics,
+  classification and the early-warning engine are deterministic TypeScript; every AI feature has a
+  rule-engine fallback producing the same output structure.</div>
+
+  <!-- 07 -->
+  <div class="chapter-header">
+    <div class="sec-tag">07 · The workspace</div>
+    <div class="sec-title">The eleven analysis tabs</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">Below the map sits the analytics workspace. Every tab is recomputed for the
+  current AOI and day, and every tab names its data source. They are grouped here by job: the
+  <b>record keepers</b> that answer "what happened", the <b>deep labs</b> that answer "what does it
+  mean", and the <b>horizon</b> tabs that answer "what comes next".</p>
+
+  <h4 class="mini">The record keepers</h4>
+  <div class="card"><div class="c-title">🔥 Burning Calendar <span class="chip">· the centerpiece</span></div>
+  <p>A <b>26-year × 12-month heatmap per sensor</b> (2000 → today): rows are years, columns are
+  months, cell color is detection count on the selected accessible ramp — <b>Inferno,
+  Colorblind-viridis, or Mono</b> — with the choice persisted in localStorage and proper
+  <i>aria-pressed</i> toggles. Months with |z| ≥ 2 against their own climatology are ringed;
+  FRP bars carry the energy story alongside.</p>
+  <p>The <b>"this month vs historical median" KPI</b> expresses the current month as a ×-ratio and
+  a z-score against the same-month median — provenance-aware for custom AOIs. The panel also prints
+  the <b>continuity coefficient</b>: the median VIIRS/MODIS overlap ratio and its coefficient of
+  variation, the honest uncertainty readout for the whole harmonization. Click any month to load
+  it on the map.</p></div>
+
+  <div class="card"><div class="c-title">🎯 Impact — carbon, climate &amp; smoke</div>
+  <p>The <b>carbon chain</b> of the ignis-fire-calendar emissions dataset runs live: ΣFRP → fire
+  radiative energy → dry matter consumed → <b>CO₂e</b>, with human-scale equivalences and context
+  against the region's 26-year record. The <b>smoke half</b> pulls Open-Meteo CAMS air quality for
+  the AOI center — US AQI band with advice, PM2.5, CO, aerosol optical depth — and flags smoke
+  suspicion when the air column agrees with the live fire record.</p></div>
+
+  <div class="card"><div class="c-title">🔔 Watchlist — personal fire alerts</div>
+  <p>Save the places you care about — home, farm, village — with a radius, and IGNIS checks the
+  <b>live detections</b> against them, re-checking every five minutes while the tab is open.
+  Channels are in-app notification, the <b>Browser Notification API</b>, and optional e-mail via a
+  keyless relay (one-time activation, documented in the UI). There is <b>zero server state and
+  zero credentials</b> — the watchlist is privacy-first by construction.</p></div>
+
+  <div class="card"><div class="c-title">🧪 Fire Cluster Lab — segmentation</div>
+  <p>In-browser <b>DBSCAN</b> (ε adaptive to AOI size, grid-accelerated) plus <b>convex-hull fire
+  boundaries</b> via Andrew's monotone chain. The cluster table reports ΣFRP, spread, hull area,
+  <b>front-ratio</b> (perimeter ÷ 2√(πA) — elongation marks an advancing fire front), night share
+  and sensor mix. A log-binned <b>FRP histogram</b> and a <b>diurnal signature</b> of UTC acquisition
+  hours make the orbital detection pattern visible, and <b>persistent fire systems</b> are tracked
+  across the replay window. Hulls draw on the map; clusters link to the Analyst.</p></div>
+
+  <div class="card"><div class="c-title">📊 Daily Dynamics</div>
+  <p>The day-by-day picture: stacked <b>per-sensor daily detections</b> (the era split is visible at
+  a glance), the fire radiative <b>energy curve</b>, day/night balance, and the
+  <b>MODIS↔VIIRS cross-validation scatter</b> against the 1:1 line — the harmonization problem in
+  one chart. A deterministic verdict closes it: <b>ESCALATING / DECLINING / STEADY</b>. The 🔮
+  next-day risk-field card from the footprint-forecaster model lives here too.</p></div>
+
+  <div class="card"><div class="c-title">📈 Time-Series Lab</div>
+  <p><b>STL-style decomposition</b> (trend / seasonal / residual) of the monthly record, a
+  <b>Theil-Sen robust trend</b>, <b>CUSUM change points</b>, and a climatology view with a robust
+  <b>p10–p90 percentile envelope</b> (replacing the old mean±1σ). Residual months with |z| ≥ 2 are
+  ringed red (surplus) or blue (deficit) directly on the observed line, so anomalies announce
+  themselves without reading a table.</p></div>
+
+  <h4 class="mini">The horizon</h4>
+  <div class="card"><div class="c-title">🔭 Seasonal Outlook &nbsp;·&nbsp; 🧭 Burn Regime</div>
+  <p>The outlook runs a <b>harmonic (Fourier) regression</b> forecast of the next 12 months in
+  log-space with residual uncertainty bands, plus the event-detector model's
+  <b>P(extreme month)</b> badge — a trained early-warning classifier over the 25-year calendars.
+  The regime tab classifies the AOI by <b>nearest-prototype distance</b> against eight NASA-derived
+  reference regimes, powered by the fire-regime model trained on 138k real FIRMS detections —
+  "what kind of fire landscape is this?" in one badge.</p></div>
+
+  <div class="card"><div class="c-title">📜 Methodology &nbsp;·&nbsp; 🤗 Open Science hub</div>
+  <p>The <b>Methodology</b> tab is the honesty panel: full data provenance (FIRMS NRT C6.1/V2, GIBS
+  MVT archive to Nov 2000, GIBS imagery layer + date, EONET, Open-Meteo), the harmonization math,
+  the MOD11 decode, and the <b>S-NPP sunset note</b> — VIIRS-SNPP decommissioning on Nov 2, 2026 and
+  what it means for the continuity coefficient. Every limitation is stated where the user can see
+  it. The <b>Open Science</b> tab fetches IGNIS's public Hugging Face assets live: the regime model
+  (open weights, training script, metrics) and the 26-year dataset (long-format CSV, regime matrix,
+  calibrated FRE→CO₂e emissions, complex inventories) with a datasets-server row preview.</p></div>
+
+  <!-- 08 -->
+  <div class="chapter-header">
+    <div class="sec-tag">08 · Deep science</div>
+    <div class="sec-title">Statistics Science Lab <span style="font-size:15px;color:var(--muted)">— 7 sub-tabs, 11 methods</span></div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">An expert workspace for the "more scientific analysis" brief: eleven
+  classical, citable methods implemented from textbook form in deterministic, auditable
+  TypeScript — verified against <b>28/28 synthetic ground-truth tests</b> that plant a known signal
+  and assert the method recovers it. Each sub-tab is a distinct chart type and closes with a
+  plain-language <b>"Deterministic read"</b> verdict, so a land manager gets the conclusion without
+  reading the math.</p>
+  <table class="tbl">
+    <tr><th style="width:31%">Sub-tab</th><th>Methods &amp; displays</th></tr>
+    <tr><td>Trend significance</td><td>Mann-Kendall test (tie-corrected S, Z, two-sided p) + Sen's slope → significance cards and fitted-trend chart</td></tr>
+    <tr><td>Memory &amp; persistence</td><td>ACF correlogram (SVG with 1.96/√N white-noise band), Hurst exponent (R/S), 3-month momentum &amp; volatility</td></tr>
+    <tr><td>Hidden cycles</td><td>DFT periodogram on the climatology-deseasonalized series; top-3 spectral peaks — the ENSO/drought-band teleconnection view</td></tr>
+    <tr><td>Extremes &amp; return periods</td><td>Weibull plotting positions + Gumbel EVT type-I fit → 1-in-10/25/50-yr season levels; peaks-over-threshold anomaly register (z ≥ 1.5)</td></tr>
+    <tr><td>Sensor agreement</td><td>Pearson + Spearman + ratio Bland-Altman (log-diff bias → geometric ratio + 95% limits of agreement) — the formal harmonization statistics</td></tr>
+    <tr><td>Season phenology</td><td>40%-fractile onset/offset/duration per year as a Gantt; onset-shift trend in days per decade</td></tr>
+    <tr><td>Energy &amp; clustering</td><td>FRP economics: log-spaced MW bins (counts vs energy share), Gini coefficient, top-1% share, Wooster classes; Moran's I with 499-fold permutation inference + Anselin LISA quadrants + Moran scatter</td></tr>
+  </table>
+  <div class="alert"><span class="a-k">Live sanity check (Amazon, 2026-10-29):</span> MK Z = −1.47,
+  p = 0.141 — an honest <i>no trend</i>; ρ₁ = 0.41 (significant memory); Hurst 0.625 (persistent);
+  record year 2004; 1-in-25-yr ≈ 1.7 M detections — already surpassed, coherent with the record.
+  VIIRS/MODIS ratio 10.78× with 95% limits of agreement 2.97–39.09× over 173 overlap months
+  (r = 0.961, ρ = 0.939); Gini 0.631 with the top 1% of months holding 16% of all energy;
+  26 fire-season onsets, stationary.</div>

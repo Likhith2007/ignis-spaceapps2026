@@ -1,0 +1,97 @@
+<!-- ==================== PDF2 COVER ==================== -->
+<div class="cover">
+    <div class="stars"></div>
+    <div class="cover-topline">
+        <span><span class="dot">&#9650;</span> FLAGSHIP BUILD BIBLE // CHALLENGE #09 &mdash; SOLO API EDITION</span>
+        <span>DOC-ID: SP-2026-007</span>
+    </div>
+    <div class="cover-badge">NASA SPACE APPS 2026 &nbsp;&#9670;&nbsp; HARMONIZATION OF MODIS &amp; VIIRS HOT SPOTS</div>
+    <h1 class="cover-title"><div>PYRO&shy;CHRON</div><div class="hl">BUILD BIBLE</div></h1>
+    <p class="cover-sub">Portion by portion, step by step, from an empty public repository to a deployed, judged, submitted product. Every input arrives over an API, every computation runs in continuous integration, every feature has a deterministic core &mdash; built by one operator directing chat assistants.</p>
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <div class="k">EXECUTION UNITS</div>
+            <div class="v"><em>10</em> PORTIONS P0&ndash;P9</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">NASA API FAMILIES</div>
+            <div class="v"><em>6</em> DOCUMENTED</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">FUSED RECORD</div>
+            <div class="v">MODIS <em>2000</em> + VIIRS <em>2012</em></div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">INFRASTRUCTURE BILL</div>
+            <div class="v"><em>$0</em> / MONTH</div>
+        </div>
+    </div>
+    <div class="cover-bottomline">
+        <span>PREPARED BY: MISSION COMMAND</span>
+        <span>REV 2.0 // SOLO API EDITION</span>
+    </div>
+</div>
+
+<div class="main-content">
+
+<!-- ============ BRIEFING ============ -->
+<div class="chapter-header first">
+    <div class="sec-tag">TRANSMISSION 007 // EXECUTION ORDERS</div>
+    <div class="sec-title">How to Run This Bible</div>
+    <p class="sec-lede">Ten portions, one contract, zero improvisation.</p>
+</div>
+
+<p class="body-text">This document is the complete execution layer for PYROCHRON under the chat-only, API-only operating system defined in SP-2026-006. It is organized as <b>ten portions</b>, P0 through P9, each a self-contained unit of work with five fields: <b>GOAL</b> (what exists when the portion is done), <b>STEPS</b> (the ordered actions), <b>PROMPT RECIPE</b> (the paste-ready instruction for the chat assistant that does the coding), <b>ACCEPTANCE</b> (the objective test that must pass), and <b>COMMIT</b> (the message that lands in history). A portion is either done &mdash; acceptance green, commit pushed &mdash; or not started; there is no &ldquo;mostly done,&rdquo; because the gates in the war schedule assume green commits, not intentions.</p>
+
+<p class="body-text">Four iron rules govern the whole weekend. <b>Demo-first ordering:</b> portions are sequenced so a demoable product exists from Hour 24 and nothing before the hero screen is gold-plated. <b>Commit every portion:</b> CI proves each claim; a red test reverts, never lingers. <b>No refactor after P7:</b> from automation onward, changes are additive patches, because the video and the pitch need a stable stage. <b>Deterministic-first:</b> every feature begins as plain statistics and static files; hosted AI is a stretch flag, never a dependency. The science specification lives in Section 03 and is deliberately written as implementable pseudocode &mdash; hand it to a chat assistant verbatim and the harmonization engine is real within a focus cycle.</p>
+
+<div class="callout">
+    <div class="co-tag">THE PORTION CONTRACT</div>
+    GOAL &rarr; STEPS &rarr; PROMPT RECIPE &rarr; ACCEPTANCE &rarr; COMMIT. If any field is missing, the portion is not ready to run. If all five are green, the next portion starts within minutes. The bible is written so that no decision is made during the event that could have been made before it.
+</div>
+
+<!-- ============ S1 ARCHITECTURE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 01 // SYSTEM ARCHITECTURE REV 2</div>
+    <div class="sec-title">APIs In, Artifacts Out, Nothing Alive in Between</div>
+    <p class="sec-lede">The whole system is a pipeline from NASA&rsquo;s servers to a CDN, with exactly one live function.</p>
+</div>
+
+<div class="arch">
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 1 // NASA DATA SOURCES &mdash; AUTHENTIC, PUBLIC, API-DELIVERED</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">FIRMS NRT API</div><div class="d">MODIS + VIIRS active fire points, last days, CSV by bbox</div></div>
+            <div class="arch-node"><div class="n">FIRMS ARCHIVE</div><div class="d">2000&ndash;present standard-quality record via Earthdata</div></div>
+            <div class="arch-node"><div class="n">GIBS WMTS</div><div class="d">basemap + context layers for the map view</div></div>
+            <div class="arch-node"><div class="n">APPEEARS API</div><div class="d">MCD64A1 burned area for validation</div></div>
+            <div class="arch-node"><div class="n">POWER + EONET</div><div class="d">fire-weather indices; event cross-reference cards</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; scheduled + triggered</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 2 // GITHUB ACTIONS CI &mdash; THE ONLY COMPUTE WE OWN</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">INGEST WORKFLOW</div><div class="d">cron every 6h; archive backfill + NRT append, retry + backoff</div></div>
+            <div class="arch-node"><div class="n">HARMONIZE + PRODUCTS</div><div class="d">calibration, FAI grid, climatology, anomalies &rarr; JSON</div></div>
+            <div class="arch-node"><div class="n">ALERTS</div><div class="d">Telegram digest + threshold alarms; deploy hook</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; commits static products</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 3 // DELIVERY &mdash; STATIC EVERYTHING, ONE PROXY</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">STATIC JSON PRODUCTS</div><div class="d">calendar / clim / events / meta, &le;5MB each, in-repo</div></div>
+            <div class="arch-node"><div class="n">NEXT.JS STATIC EXPORT</div><div class="d">MapLibre + GIBS; calendar + explorer UI</div></div>
+            <div class="arch-node"><div class="n">1 SERVERLESS PROXY</div><div class="d">live NRT passthrough, key stays server-side</div></div>
+            <div class="arch-node"><div class="n">VERCEL / NETLIFY</div><div class="d">CDN hosting, preview URLs, $0</div></div>
+        </div>
+    </div>
+</div>
+
+<p class="body-text">Read the diagram as a numbered data flow: <b>(1)</b> scheduled and manual triggers run the ingest workflow, which pulls the recent active-fire record from FIRMS and, on demand, backfills from the archive; <b>(2)</b> the harmonize-and-products job calibrates the two sensor records onto one grid, computes climatology and anomalies, and writes versioned JSON products; <b>(3)</b> the products are committed to the repository, which triggers the hosting platform to publish the static front-end; <b>(4)</b> the alert workflow compares the newest anomalies against thresholds and sends the Telegram digest; <b>(5)</b> in the browser, the app reads only committed products from the CDN, with the single serverless proxy as the optional live window onto the last few days. Nothing persists state anywhere: no database, no session store, no cache to invalidate &mdash; git is the database, and the commit log is the audit trail a judge can walk end to end.</p>
+
+<div class="callout">
+    <div class="co-tag">WHY THIS SHAPE WINS</div>
+    Every judge-visible property &mdash; instant load, replayable pipeline, honest lineage, zero-drama demo &mdash; is a direct consequence of the shape. The architecture is not a constraint artifact; it is the Best-Use-of-Data argument rendered as software.
+</div>

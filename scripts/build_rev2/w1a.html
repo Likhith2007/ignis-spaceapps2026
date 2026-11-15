@@ -1,0 +1,92 @@
+<!-- ==================== PDF1 COVER ==================== -->
+<div class="cover">
+    <div class="stars"></div>
+    <div class="cover-topline">
+        <span><span class="dot">&#9650;</span> REV 2.0 MODIFIED MASTER PLAN // SOLO EDITION</span>
+        <span>DOC-ID: SP-2026-006</span>
+    </div>
+    <div class="cover-badge">NASA SPACE APPS 2026 &nbsp;&#9670;&nbsp; STRATEGIC UPDATE &mdash; SUPERSEDES REV 1 EXECUTION SECTIONS</div>
+    <h1 class="cover-title"><div>WIN</div><div class="hl">SOLO</div></h1>
+    <p class="cover-sub">The operating system for a one-person campaign: every AI available &mdash; but only in chat. No local models, no agents running overnight, no GPU. This document converts that constraint into an arsenal: chat-driven coding protocol, MCP tooling, GitHub Actions automation, and a 100&nbsp;percent API-driven build path to a global-award submission.</p>
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <div class="k">OPERATING FORCE</div>
+            <div class="v"><em>1</em> OPERATOR</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">LOCAL COMPUTE</div>
+            <div class="v"><em>0</em> GPU / 0 MODELS</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">BUILD PATH</div>
+            <div class="v"><em>100%</em> API + CI</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">EXECUTION WINDOW</div>
+            <div class="v"><em>48H</em> EVENT</div>
+        </div>
+    </div>
+    <div class="cover-bottomline">
+        <span>PREPARED BY: MISSION COMMAND</span>
+        <span>REV 2.0 // AI-NATIVE DOCTRINE</span>
+    </div>
+</div>
+
+<div class="main-content">
+
+<!-- ============ BRIEFING ============ -->
+<div class="chapter-header first">
+    <div class="sec-tag">TRANSMISSION 006 // STRATEGIC UPDATE</div>
+    <div class="sec-title">What Changed, What Survives</div>
+    <p class="sec-lede">The mission is unchanged. The way of working is rebuilt from the keel up.</p>
+</div>
+
+<p class="body-text">REV 1 of this campaign assumed a team of two to four builders with a pre-built Next.js chassis, a registry of locally-served Hugging Face models, and FastAPI micro-services gluing the stack together. The operating reality is now different and sharper: <b>one operator, with frontier AI assistants available only as chat</b> &mdash; ChatGPT, Astra, Gemini, Claude &mdash; and nothing resident on the machine. There is no local model serving, no long-lived agent, no GPU, and no background daemon. Everything that must run, must run somewhere else: inside GitHub Actions, on a hosting platform&rsquo;s edge, or behind a public API that returns an answer in a single request.</p>
+
+<p class="body-text">This constraint sounds like a downgrade. It is not. It is a <b>forcing function toward the strongest possible build style</b>: deterministic science computed in continuous integration, data products frozen as static JSON, a front-end that is pure static hosting, alerts delivered by bots instead of back-ends, and every creative inference done either at build time or through a free-tier hosted API. The result is an app that cannot crash in the demo because there is almost nothing left to crash &mdash; and an operator whose only job during the 48 hours is to direct chat assistants, accept their work at acceptance gates, and commit. This document defines that way of working; its companion, SP-2026-007, converts it into a portion-by-portion build bible for PYROCHRON, the flagship challenge.</p>
+
+<div class="callout">
+    <div class="co-tag">DOC MAP // HOW REV 2 RELATES TO THE SUITE</div>
+    SP-2026-001 (Mission Playbook) and SP-2026-002 (Challenge Dossier) remain fully valid as strategy and analysis. SP-2026-003/004/005 (PYROCHRON, PULSE, ROOTLOGIC master plans) remain valid for <b>science, product, and pitch doctrine</b> &mdash; but their execution sections (team choreography, local HF models, FastAPI services) are <b>superseded by this document and SP-2026-007</b>. Where the two generations disagree, REV 2 wins.
+</div>
+
+<!-- ============ S1 CONSTRAINT MODEL ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 01 // THE CHAT-ONLY CONSTRAINT MODEL</div>
+    <div class="sec-title">One Human, Many Minds, One Interface</div>
+    <p class="sec-lede">Define the constraint precisely, then exploit it precisely.</p>
+</div>
+
+<p class="body-text">The tooling reality has three hard edges. First, <b>AI is conversational</b>: the assistants are brilliant at writing, reviewing, and debugging code, but they do not persist between sessions, cannot hold the build running, and cannot watch the world. Second, <b>there is no local heavy compute</b>: no GPU inference, no SAR processing farm, no model fine-tuning, nothing that would take longer than a laptop tolerates. Third, <b>the operator is a single thread of attention</b>: unlike a four-person team, one human cannot simultaneously debug an ingestion script, style a component, and write a pitch. Every REV 2 decision follows from trading against these three edges &mdash; and the trade is always the same: move work to machines that never sleep (CI schedulers, static CDNs, hosted APIs), and reserve the human for judgment, sequencing, and taste.</p>
+
+<p class="body-text">The model also has a generous upside the old plan never used: <b>frontier chat assistants are outstanding at exactly the work this build needs</b>. FIRMS CSV ingestion, climatology statistics, React components, GitHub Actions YAML &mdash; this is well-trodden, heavily-documented territory where chat-generated code is near-expert quality on the first or second iteration. The tasks that killed REV 1&rsquo;s most ambitious alternates &mdash; SAR interferometry, asteroid difference imaging, on-device vision models &mdash; are precisely the tasks that get harder under this constraint, which is why the re-selection verdict in Section 02 reshuffles the bench. The constraint does not just change how we build; it sharpens <b>what</b> we should build.</p>
+
+<div class="sub-title"><span class="num">01.1</span> Structural Consequences &mdash; The Three Moves</div>
+<table>
+    <colgroup><col style="width:24%"><col style="width:38%"><col style="width:38%"></colgroup>
+    <thead><tr><th>CONSEQUENCE</th><th>WHAT IT MEANS</th><th>HOW REV 2 ANSWERS IT</th></tr></thead>
+    <tbody>
+        <tr><td><b>Compute leaves the laptop</b></td><td>Any job longer than minutes must run in GitHub Actions on a schedule or trigger, not in a terminal session</td><td>Ingestion, harmonization, and product-building are CI workflows with retries and artifact uploads; the laptop only runs a browser and a chat tab</td></tr>
+        <tr><td><b>Models become APIs or arithmetic</b></td><td>No hosted weights of our own; inference must be a one-shot HTTP call on a free tier, or skipped entirely</td><td>Forecasting and anomaly detection are deterministic statistics written in Python; optional hosted calls (HF Inference Providers) decorate but never sit in the critical path</td></tr>
+        <tr><td><b>The operator becomes an orchestrator</b></td><td>One person cannot do parallel work, but can run parallel <span class="mono">chat sessions</span> against one shared repository</td><td>Three standing chat windows (DATA / FRONTEND / QA) with git commits as the shared memory; Section 03 defines the protocol</td></tr>
+    </tbody>
+</table>
+
+<div class="sub-title"><span class="num">01.2</span> What We Lose vs. What We Gain</div>
+<div class="grid-2">
+    <div class="card">
+        <div class="card-tag">LOST // PAID IN COMPLEXITY</div>
+        <div class="card-title">The Team Parallelism Tax</div>
+        <div class="card-body">No second pair of hands means the 48-hour plan trades feature breadth for <b>sequencing discipline</b>: portions are strictly ordered so that a demoable product exists from Hour&nbsp;24 onward. Local model serving disappears, so the AI showcase moves from &ldquo;our deployed model&rdquo; to <b>&ldquo;our method, computed honestly&rdquo;</b> &mdash; which judges score just as well when documented transparently. FastAPI services are gone; anything dynamic is one stateless serverless function, or nothing.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">GAINED // BANKED AS ROBUSTNESS</div>
+        <div class="card-title">The Static Product Dividend</div>
+        <div class="card-body">A build that is 95&nbsp;percent static files cannot fail at the podium: no cold starts, no database timeouts, no certificate drama. CI re-runs are free, so <b>data can be rebuilt hourly on event weekend</b> and every run is reproducible &mdash; a judge can replay the pipeline from the public repo. And because the whole stack is API-shaped, the same engine serves PULSE or ROOTLOGIC with a skin change, keeping the pivot option alive at near-zero cost.</div>
+    </div>
+</div>
+
+<div class="callout">
+    <div class="co-tag">DOCTRINE LINE</div>
+    If a feature requires something that runs continuously, learns overnight, or needs a GPU &mdash; it is redesigned into a build-time artifact or cut. The demo must work with the network cable pulled: cached data, static pages, zero live dependencies beyond the basemap tiles.
+</div>

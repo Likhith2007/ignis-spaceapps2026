@@ -1,0 +1,93 @@
+
+<!-- ============ S7 AUTOMATION RECIPES ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 07 // AUTOMATION RECIPES &mdash; WHAT IS ALREADY SHIPPED</div>
+    <div class="sec-title">The Machines Are Already Working</div>
+    <p class="sec-lede">Four scripts, two workflows, one verification run green &mdash; the automation layer is not planned, it exists.</p>
+</div>
+
+<p class="body-text">The vault ships a working automation core, and two of its pulls have already produced real data in this session: <span class="mono">firms_pull.py</span> (FIRMS area CSV &rarr; raw JSON + cross-sensor harmonized GeoJSON on a 0.0036&deg; grid with confidence normalization and 15-minute cross-sensor dedup), <span class="mono">eonet_pull.py</span> (98 live events pulled), and <span class="mono">power_pull.py</span> (578-day Fresno climate series pulled). The fourth script, <span class="mono">verify_all.sh</span>, re-runs the full credential check in under a minute and is the pre-demo ritual. On the CI side, <span class="mono">verify_firms.yml</span> already executed successfully on a runner, and <span class="mono">firms_daily.yml</span> (cron 02:17 UTC, pull &rarr; harmonize &rarr; commit data/) is staged for the public project repo at P0. The MCP layer remains optional tooling for chat clients &mdash; the same operations run with plain bash if a client lacks MCP support.</p>
+
+<table>
+    <colgroup><col style="width:26%"><col style="width:42%"><col style="width:32%"></colgroup>
+    <thead><tr><th>ASSET</th><th>WHAT IT DOES</th><th>STATE</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">scripts/firms_pull.py</td><td>AOI &times; source &times; date pulls; grid-bucket harmonization; emits raw + harmonized GeoJSON</td><td>compiled; awaits runner (sandbox egress)</td></tr>
+        <tr><td class="mono">scripts/eonet_pull.py</td><td>EONET v3 &rarr; compact event JSON for cross-links and TERRAPHONIC-style feeds</td><td><b>ran live &mdash; 98 events</b></td></tr>
+        <tr><td class="mono">scripts/power_pull.py</td><td>NASA POWER daily point series &rarr; JSON (fill-value filtered)</td><td><b>ran live &mdash; 578 days</b></td></tr>
+        <tr><td class="mono">scripts/verify_all.sh</td><td>Full credential + data re-verification, tee to report</td><td>ran live; re-run D-7, D-1, pre-demo</td></tr>
+        <tr><td class="mono">.github/workflows/verify_firms.yml</td><td>workflow_dispatch: mapkey_status + sample area pull on runner</td><td><b>RUN 35534623053 SUCCESS</b></td></tr>
+        <tr><td class="mono">docs/templates/firms_daily.yml</td><td>Cron 02:17 UTC pull-harmonize-commit for the public repo</td><td>staged for P0</td></tr>
+        <tr><td class="mono">HF dataset repo</td><td>Private oversize data cache (parquet, long histories)</td><td><b>created live</b></td></tr>
+    </tbody>
+</table>
+
+<!-- ============ S8 COUNTDOWN ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 08 // COUNTDOWN TO NOV 14</div>
+    <div class="sec-title">Fifty-Four Days, Six Runways</div>
+    <p class="sec-lede">Pre-event work happens in six windows; the event itself executes the SP-2026-006 war schedule.</p>
+</div>
+
+<table>
+    <colgroup><col style="width:18%"><col style="width:56%"><col style="width:26%"></colgroup>
+    <thead><tr><th>WINDOW</th><th>GOAL</th><th>EXIT GATE</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">D-54 &rarr; D-40</td><td>P0&ndash;P3: repo live, daily cron green for 7 consecutive days, data layer + calendar hydrating from real FIRMS history</td><td>calendar renders 2000&ndash;2026</td></tr>
+        <tr><td class="mono">D-40 &rarr; D-28</td><td>P4&ndash;P6: map explore, Trend Lab statistics, Alert Lab cards; PULSE S4a&ndash;S4b in parallel evenings</td><td>trend verdicts pass fixtures</td></tr>
+        <tr><td class="mono">D-28 &rarr; D-14</td><td>P7 story mode + PULSE S4c; ASF + LAADS registrations done; 14-day cron reliability log</td><td>five case files render</td></tr>
+        <tr><td class="mono">D-14 &rarr; D-7</td><td>P8 polish; load-test demo path; verify_all.sh green; start video drafts</td><td>Lighthouse &ge; 90, zero-key audit</td></tr>
+        <tr><td class="mono">D-7 &rarr; D-1</td><td>P9 deploy; record final demo video; submission page drafted; two-device dry run; sleep</td><td>site frozen, tag v1.0-rc</td></tr>
+        <tr><td class="mono">NOV 14&ndash;15</td><td>Execute war schedule: data refresh, final pitch, submit early, then rotate all credentials on the 16th</td><td>submission confirmed</td></tr>
+    </tbody>
+</table>
+
+<!-- ============ S9 SUBMISSION MAP ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 09 // SUBMISSION &amp; JUDGING MAP</div>
+    <div class="sec-title">What the Judges See, and Why It Wins</div>
+    <p class="sec-lede">Every submission point maps to a category; every category maps to something already built or verified.</p>
+</div>
+
+<p class="body-text">PYROCHRON submits against <b>Best Use of Data</b> first and Storytelling second, and its evidence chain is unusually clean for a hackathon: the harmonization method is documented and honest about sensor biases, the trend verdicts are reproducible from committed JSON, and the two-decade calendar is a story told in one screen. PULSE submits against <b>Best Use of Science</b>, with the Mann-Kendall / Sen protocol as its spine and printable case files as its demo. The submission page for each project is assembled from the commit log itself &mdash; portion IDs, acceptance results, and the verification report read as a professional engineering narrative that judges rarely see at this level. Demo integrity rules hold throughout: every number on screen traces to a named NASA dataset, and the &ldquo;data as of&rdquo; badge turns any outage into a transparency feature rather than a failure.</p>
+
+<ul class="tick">
+    <li><b>Project page</b> (per project): &le; 2000-char summary, S-2026 docs links, data-source table with endpoints, team role note (solo + AI-assisted, stated openly).</li>
+    <li><b>Demo video</b>: 60s cut + 3min cut; scripts pre-written in S-PITCH session; screen-path rehearsed against the offline bundle.</li>
+    <li><b>Open resources</b>: public repos (code + committed data), vault stays private; secrets audit output included as a screenshot in the README.</li>
+    <li><b>Verification appendix</b>: the 2026-09-20 credential verification log &mdash; proof the data supply chain was tested before the build, a differentiator in Q&amp;A.</li>
+</ul>
+
+<!-- ============ S10 MASTER CHECKLIST ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 10 // THE FIRST TEN COMMANDS</div>
+    <div class="sec-title">What To Do The Moment You Close This PDF</div>
+    <p class="sec-lede">Automation starts in the chat &mdash; but the first moves are here, ordered.</p>
+</div>
+
+<div class="check">
+    <div class="check-item"><div class="bx"></div><div><b>1.</b> Clone the vault: <span class="mono">git clone https://github.com/Hisernberg/spaceapps-2026-vault</span> and <span class="mono">source secrets.env</span>.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>2.</b> Read <span class="mono">AUTOMATION_PLAYBOOK.md</span> once, end to end &mdash; it is the chat-side twin of this order.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>3.</b> Re-run <span class="mono">bash scripts/verify_all.sh</span> on your own network &mdash; confirm FIRMS from home (sandbox could not route; your line will).</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>4.</b> Register ASF Vertex + LAADS DAAC (Section 04, ~10 minutes total).</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>5.</b> Open chat session S0 with the playbook header; have it generate the P0 bootstrap + README for <span class="mono">pyrochron-app</span>.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>6.</b> Create the public repo with the &sect;3 commands; set <span class="mono">gh secret set FIRMS_MAP_KEY -R Hisernberg/pyrochron-app</span>.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>7.</b> Copy <span class="mono">firms_daily.yml</span> into <span class="mono">.github/workflows/</span>; trigger <span class="mono">workflow_dispatch</span>; watch the first daily pull land data/.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>8.</b> Sessions P1&rarr;P3, one portion per session; commit with portion IDs after each acceptance.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>9.</b> Put the portion checklist (playbook footer) somewhere visible; tick P1&ndash;P9 and S4a&ndash;c as they land.</div></div>
+    <div class="check-item"><div class="bx"></div><div><b>10.</b> Calendar reminder: <b>Nov 16, 2026 &mdash; rotate every credential</b>.</div></div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- ==================== ENDING ==================== -->
+<div class="ending">
+    <div class="stars"></div>
+    <div class="end-tag">SP-2026-008 // FINAL OPERATIONS ORDER</div>
+    <div class="end-big">THE CORRIDOR IS <span class="hl">LIVE.</span><br>NOW BUILD.</div>
+    <div class="end-text">Seven documents defined the campaign. This one armed it: six of six credential systems verified with real data pulled, a private vault guarding every secret, automation already green on GitHub&rsquo;s machines, and a fifty-four-day runway mapped portion by portion. Open the playbook, paste the header, and start Session P1 &mdash; the fire record of twenty years is waiting on the other side of one HTTP call you have already proven works.</div>
+    <div class="end-final">
+        <span>MISSION COMMAND // SPACE APPS 2026</span>
+        <span>EVENT: NOV 14&ndash;15 &middot; ROTATION: NOV 16</span>
+    </div>
+</div>

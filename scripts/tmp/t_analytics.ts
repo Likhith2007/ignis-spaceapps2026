@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import { buildUnified, buildClimatology, latestAnomalies } from '../../src/lib/ignis/analytics';
+const doc = JSON.parse(fs.readFileSync('data/ignis/calendar_amazon.json', 'utf8'));
+const u = buildUnified(doc);
+const c = buildClimatology(u.rows);
+console.log('rows:', u.rows.length, '| ratio:', u.meta.ratioCount?.toFixed(2), '| frpRatio:', u.meta.ratioFrp?.toFixed(2), '| overlapMonths:', u.meta.overlapMonths);
+console.log('median[9] (Oct):', c.median[9], 'mean[9]:', c.mean[9], 'peakMonth:', c.peakMonth);
+const la = latestAnomalies(u.rows, c, 2);
+console.log('latest anomalies:', la.map(a => `${a.ym} n=${a.count} z=${a.z}`).join(' | '));
+if (c.median.length !== 12) throw new Error('median length != 12');
+if (u.rows.some(r => !Number.isFinite(r.count))) throw new Error('non-finite row');
+console.log('OK');

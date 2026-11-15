@@ -1,0 +1,85 @@
+<!-- ============ S2 API ARSENAL ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 02 // THE NASA API ARSENAL</div>
+    <div class="sec-title">Six Families, Exact Endpoints, Zero Guesswork</div>
+    <p class="sec-lede">Every input the app consumes, with its URL pattern, auth, and limits &mdash; verified before the event.</p>
+</div>
+
+<p class="body-text">The build consumes six NASA data families, and all six are free, documented, and reachable over plain HTTPS. The <b>critical path</b> uses only the first two rows of the table below &mdash; FIRMS for the fire record itself, GIBS for map context &mdash; and the rest enrich the product: MCD64A1 burned area validates the harmonized calendar against physical truth, POWER supplies fire-weather context for the report panels, and EONET converts big anomaly spikes into named, citable events. Each family&rsquo;s auth model is deliberately simple: one free MAP_KEY, one free Earthdata login, and nothing else. The Hour 0&ndash;2 data check in the war schedule pings every row of this table before the challenge commitment, so no rate limit or schema surprise is discovered mid-build.</p>
+
+<table>
+    <colgroup><col style="width:17%"><col style="width:38%"><col style="width:12%"><col style="width:33%"></colgroup>
+    <thead><tr><th>FAMILY</th><th>ENDPOINT PATTERN</th><th>AUTH</th><th>ROLE &amp; LIMITS</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><b>FIRMS NRT</b><br><span class="mono">critical path</span></td>
+            <td class="mono">firms.modaps.eosdis.nasa.gov/api/area/csv/{MAP_KEY}/{SOURCE}/{s},{w},{n},{e}/{DAY_RANGE}/{DATE}</td>
+            <td class="mono">MAP_KEY</td>
+            <td>Recent active-fire CSV by bounding box. Sources: MODIS_NRT (C6.1), VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT (+NOAA-21). DAY_RANGE window is capped per current docs (5&ndash;10 days &mdash; <b>confirm exact cap at Hour 0</b>); loop calls to backfill. Free key from the FIRMS map-key page.</td>
+        </tr>
+        <tr>
+            <td><b>FIRMS ARCHIVE</b><br><span class="mono">critical path</span></td>
+            <td class="mono">Archive Download Tool / Earthdata &rarr; per-AOI yearly CSV (MCD14ML standard quality; VIIRS V2)</td>
+            <td class="mono">Earthdata</td>
+            <td>The 2000&ndash;present spine. MODIS from Nov 2000; VIIRS 375&nbsp;m from 20 Jan 2012. Pulled <b>pre-event</b> for the 12 preset AOIs and committed to the repo (bounded boxes keep each year&rsquo;s CSV small); refreshed live by NRT during the event.</td>
+        </tr>
+        <tr>
+            <td><b>GIBS WMTS</b><br><span class="mono">context</span></td>
+            <td class="mono">gibs.earthdata.nasa.gov/wmts/epsg3857/best/{LAYER}/default/{TIME}/{z}/{y}/{x}.jpg</td>
+            <td class="mono">none</td>
+            <td>Basemap and fire-weather context tiles (True Color, Thermal Anomalies layers) behind MapLibre. No key; rate-limited politely. Degrades to a plain dark style offline &mdash; demo never depends on it.</td>
+        </tr>
+        <tr>
+            <td><b>AppEEARS API</b><br><span class="mono">validation</span></td>
+            <td class="mono">appeears.earthdatacloud.nasa.gov/api &mdash; POST /login (Bearer), POST /task (area), GET /task/{id}, bundle download</td>
+            <td class="mono">Earthdata</td>
+            <td>MCD64A1 v061 monthly 500&nbsp;m burned area for the 12 AOIs; pre-event task runs produce the validation ground truth for Section 03&rsquo;s correlation check. One token, one queue &mdash; submit early, poll later.</td>
+        </tr>
+        <tr>
+            <td><b>POWER API</b><br><span class="mono">enrichment</span></td>
+            <td class="mono">power.latonaservices.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,WS2M,PRECTOTCORR&community=AG&latitude=&hellip;&longitude=&hellip;</td>
+            <td class="mono">none</td>
+            <td>Fire-weather context (temperature, humidity, wind, precipitation) for report panels &mdash; pre-event pulls for climatology weeks; static JSON, no runtime calls.</td>
+        </tr>
+        <tr>
+            <td><b>EONET v3</b><br><span class="mono">enrichment</span></td>
+            <td class="mono">eonet.gsfc.nasa.gov/api/v3/events?category=wildfires&status=all</td>
+            <td class="mono">none</td>
+            <td>Named event cross-reference: when the calendar flags an anomalous week, EONET supplies the human-readable headline and geometry for the event cards.</td>
+        </tr>
+    </tbody>
+</table>
+<div class="tbl-note">All rows free of charge. FIRMS key + Earthdata login registered at Portion P0; credentials live only in GitHub Actions secrets, never in client code.</div>
+
+<!-- ============ S3 HARMONIZATION ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 03 // THE HARMONIZATION ENGINE &mdash; FULL SPECIFICATION</div>
+    <div class="sec-title">Two Sensors, One Calendar, Written as Arithmetic</div>
+    <p class="sec-lede">Deterministic, documented, and implementable by a chat assistant in one focus cycle.</p>
+</div>
+
+<p class="body-text">The engine turns two sensor archives into one activity calendar in five steps, each of which is a pure function a judge can audit. <b>Step 1 &mdash; unify the schema.</b> Every detection, from either sensor, becomes <span class="mono">{date, lat, lon, sensor, satellite, frp_mw, conf_raw, conf_q, daynight}</span>, where confidence is remapped to a shared four-band scale. <b>Step 2 &mdash; calibrate the sensors.</b> On the 2012&ndash;2025 overlap, VIIRS 375&nbsp;m reliably out-detects MODIS 1&nbsp;km (smaller pixels, finer thresholds); the engine measures that gap rather than assuming it: for each cell-month it computes the ratio of high-confidence VIIRS detections to high-confidence MODIS detections, then smooths those ratios into a seasonal transfer function <span class="mono">k(month)</span> per region. The pre-2012 MODIS-only era is inflated by <span class="mono">k</span> into &ldquo;VIIRS-equivalent&rdquo; detections &mdash; a conservative, disclosed correction, with <span class="mono">k</span> floored at 1.0 so it never deflates a detection.</p>
+
+<p class="body-text"><b>Step 3 &mdash; compute the Fire Activity Index.</b> Per 0.25&deg; cell and day, <span class="mono">FAI = &alpha;&middot;N_scaled + &beta;&middot;log&#8321;(&#8321;+FRP_sum)</span> with defaults &alpha;=1, &beta;=0.5 &mdash; a blend of detection count and radiative power that resists both tiny-flare noise and single-megafire domination; defaults are stated and sensitivity-tested in the methodology page. <b>Step 4 &mdash; climatology and anomalies.</b> Weekly FAI (ISO weeks) against a 2003&ndash;2019 baseline per week-of-year and cell yields mean and standard deviation; the anomaly is a plain z-score, highlighted at <span class="mono">|z| &ge; 2</span>. The baseline stops at 2019 so recent extreme years cannot normalize themselves. <b>Step 5 &mdash; validate.</b> Monthly FAI totals are correlated with MCD64A1 burned area per AOI (target Pearson <span class="mono">r &ge; 0.6</span>); the coefficients land on the methodology page. A calendar that survives that check is not a visualization &mdash; it is a measurement.</p>
+
+<div class="card">
+    <div class="card-tag">PSEUDOCODE // HARMONIZE.PY &mdash; HAND TO THE DATA SESSION VERBATIM</div>
+    <div class="card-body mono" style="font-size:10.5px; line-height:1.7;">
+        load detections(aoi, sensor) &rarr; unified schema &nbsp;&nbsp;# FIRMS archive CSVs, then NRT append<br>
+        remap_conf: MODIS 0-100 &rarr; Q1(&ge;80) Q2(50-79) Q3(30-49) Q4(&lt;30); VIIRS h/n/l &rarr; Q1/Q2/Q3<br>
+        keep conf_q in {Q1,Q2} for FAI &nbsp;&nbsp;# Q3+ kept for event cards only<br>
+        k[month] = median over cells of count(VIIRS Q1) / count(MODIS Q1) on 2012&ndash;2025 overlap<br>
+        scale: N_modis_era &times;= max(k[month], 1.0) &nbsp;&nbsp;# pre-2012 &rarr; VIIRS-equivalent<br>
+        fai[cell,day] = 1&middot;N_scaled + 0.5&middot;log1p(sum FRP_mw) on 0.25&deg; grid<br>
+        weekly[year,week] = sum fai over days &rarr; calendar grid<br>
+        clim[week_of_year] = mean,std of weekly[2003..2019] &rarr; z = (x&minus;mean)/std<br>
+        events = DBSCAN(eps=0.3&deg;, min_samples=5) on weekly detections &rarr; top by FAI<br>
+        validate: pearson(monthly_fai, mcd64a1_burned_area) per AOI &rarr; report if r &ge; 0.6<br>
+        write products: calendar.json, clim.json, events.json, meta.json (k table + lineage)
+    </div>
+</div>
+
+<div class="callout">
+    <div class="co-tag">HONESTY CLAUSE // WHAT WE CLAIM AND WHAT WE DO NOT</div>
+    We claim a <b>disclosed, reproducible bias correction</b>, not a perfect sensor model. The methodology page states the transfer function&rsquo;s construction, its seasonal smoothing, the FAI constants, and the validation coefficient &mdash; and names the limitations (375&nbsp;m vs 1&nbsp;km pixel mixing, nighttime detection asymmetry, small-fire under-detection pre-2012). Judges reward candor calibrated with numbers; the r-value is the proof, the limitations are the credibility.
+</div>

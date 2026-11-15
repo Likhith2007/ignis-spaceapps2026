@@ -1,0 +1,60 @@
+{
+ "per_region": [
+  {
+   "region": "amazon",
+   "mean_annual_co2e_mt": 90.23,
+   "max_co2e_mt": 321.61,
+   "years": 27
+  },
+  {
+   "region": "australia",
+   "mean_annual_co2e_mt": 195.55,
+   "max_co2e_mt": 737.98,
+   "years": 27
+  },
+  {
+   "region": "bangladesh",
+   "mean_annual_co2e_mt": 3.82,
+   "max_co2e_mt": 17.21,
+   "years": 27
+  },
+  {
+   "region": "borneo",
+   "mean_annual_co2e_mt": 16.26,
+   "max_co2e_mt": 108.35,
+   "years": 27
+  },
+  {
+   "region": "california",
+   "mean_annual_co2e_mt": 28.14,
+   "max_co2e_mt": 301.02,
+   "years": 27
+  },
+  {
+   "region": "canada",
+   "mean_annual_co2e_mt": 76.26,
+   "max_co2e_mt": 663.19,
+   "years": 27
+  },
+  {
+   "region": "congo",
+   "mean_annual_co2e_mt": 268.47,
+   "max_co2e_mt": 703.99,
+   "years": 27
+  },
+  {
+   "region": "mediterranean",
+   "mean_annual_co2e_mt": 18.15,
+   "max_co2e_mt": 73.45,
+   "years": 27
+  },
+  {
+   "region": "siberia",
+   "mean_annual_co2e_mt": 123.39,
+   "max_co2e_mt": 827.66,
+   "years": 27
+  }
+ ],
+ "global_2015_26_mean_mt": 151.75,
+ "note": "from ignis-fire-calendar analysis/ignis_emissions_estimates.csv (FRE=FRP x 1800s, DM 0.223 kg/MJ, CO2e 1.61 kg/kg)"
+}

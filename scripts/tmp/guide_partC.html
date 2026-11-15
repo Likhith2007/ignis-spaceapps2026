@@ -1,0 +1,148 @@
+
+  <!-- 09 -->
+  <div class="chapter-header">
+    <div class="sec-tag">09 · Downloads</div>
+    <div class="sec-title">Date-range search &amp; downloadable products</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">The brief's "region + date range → fire history" flow ships as
+  <b>RangeSearch</b>: from/to date inputs (iOS-safe 16&nbsp;px font) with 7 / 14 / 30 / 45-day
+  presets. A search runs spans of up to 45 days as 10-day FIRMS chunks through the unified
+  pipeline, dedupes overlapping detections, and computes per-day, per-sensor and total analytics
+  from <b>authoritative counts</b> — capped at 20,000 rows with an explicit truncation flag so the
+  accounting is always honest.</p>
+  <p class="body-text"><b>Clickable per-day bars</b> jump the map to that day. Three exports —
+  exactly what the brief asks for — work for any AOI, curated, searched or hand-drawn: the
+  <b>detections CSV</b> (per-detection rows with sensor, time, FRP, confidence, coordinates and ML
+  class), the <b>daily-counts CSV</b> (per-day/per-sensor table), and <b>GeoJSON</b> point geometry
+  for GIS import. Empty and too-long states are designed, and results disclose when they come from
+  the archive rather than near-real-time.</p>
+
+  <!-- 10 -->
+  <div class="chapter-header">
+    <div class="sec-tag">10 · Open models</div>
+    <div class="sec-title">The IGNIS model family</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">Four custom models were trained on real NASA FIRMS data and are <b>wired live
+  into the product</b> — nothing on the Hub is decorative. Every model repository ships the exact
+  training script, the data snapshot, metrics including baselines and limitations, and a full model
+  card — the same open-science standard as NASA+IBM's Prithvi releases.</p>
+  <table class="tbl">
+    <tr><th style="width:34%">Model</th><th style="width:33%">Task</th><th>Wired into</th></tr>
+    <tr><td>ignis-fire-regime-model</td><td>DBSCAN complex segmentation + K-means regime classifier (63 complexes, 138k detections)</td><td>⚡ Burn Regime panel (on-device prototypes)</td></tr>
+    <tr><td>ignis-fire-classifier</td><td>Per-detection behavior classification (HGB 0.763; portable extra-trees twin 0.685 agreement)</td><td>⚡ every detection scored live in /api/hotspots + cluster ML votes</td></tr>
+    <tr><td>ignis-event-detector</td><td>Next-month extreme-fire-month warning (AUC 0.740 on 2022-26 holdout)</td><td>⚡ Seasonal Outlook P(extreme) badge</td></tr>
+    <tr><td>ignis-fire-footprint-forecaster</td><td>Next-day complex-footprint probability field (LR twin IoU 0.58/0.55/0.42 vs persistence 0.36/0.39/0.38)</td><td>⚡ map 🔮 risk-field overlay + Daily Dynamics card</td></tr>
+  </table>
+  <p class="body-text">Beyond the four, the conversational layer uses <b>Llama-3.1-8B</b> via the
+  HF inference router (with the deterministic fallback) and <b>all-MiniLM-L6-v2</b> on-device for
+  event triage. The 26-year harmonized calendar dataset — long-format CSV, regime matrix, calibrated
+  FRE→CO₂e emissions estimates and complex inventories — is published alongside them.</p>
+
+  <!-- 11 -->
+  <div class="chapter-header">
+    <div class="sec-tag">11 · Operations</div>
+    <div class="sec-title">Status rail &amp; automation</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">The bottom rail verifies <b>all upstream systems live</b> on every load:
+  FIRMS, api.nasa.gov, GIBS, EONET, the Hugging Face endpoint, Open-Meteo, and the Earthdata JWT —
+  including the days remaining until token expiry, so a credential sunset is visible before it can
+  break a demo. <b>/api/health</b> runs the same checks server-side. In the 2026-10-29 production
+  audit, <b>15/15 API endpoints</b> returned 200 with real data; the two 400s observed were
+  parameter-validation tests, confirmed 200 with proper arguments.</p>
+  <p class="body-text"><b>Automation:</b> <i>GET /api/hooks/digest</i> returns a machine-readable
+  daily fire digest for n8n, GitHub Actions or Vercel Cron, with an optional bearer-token guard.
+  An importable n8n workflow ships in the repository (<i>automation/ignis-n8n-workflow.json</i>),
+  the cron schedule is wired in <i>vercel.json</i>, and the operations runbook documents the
+  deployment path end to end.</p>
+  <div class="kv"><span>15/15 endpoints 200</span><span>0 console errors · 1440px &amp; 390px sweeps</span><span>zero horizontal overflow</span></div>
+
+  <!-- 12 -->
+  <div class="chapter-header">
+    <div class="sec-tag">12 · Alignment</div>
+    <div class="sec-title">Feature ↔ challenge-goal map</div>
+    <div class="divider"></div>
+  </div>
+  <table class="tbl">
+    <tr><th style="width:42%">Official brief deliverable</th><th>Where it lives in IGNIS</th></tr>
+    <tr><td>Goal 1 — Harmonization of MODIS + VIIRS hotspots</td><td>Continuity coefficient + CV (Calendar) · sensor color mode (Map) · cross-validation scatter vs 1:1 (Dynamics) · Bland-Altman + Pearson/Spearman (Science Lab) · SensorPanel · <i>scaled:true</i> provenance flags</td></tr>
+    <tr><td>Goal 2 — Web app: region + date → fire history, trend, abnormality</td><td>Regions &amp; custom AOI boxes · RangeSearch · Burning Calendar · Time-Series Lab · Science Lab</td></tr>
+    <tr><td>Burning Activity Calendar, 2000s → present, month vs multi-year median, colorblind-safe</td><td>Calendar tab (ramps, z-rings, median KPI) · Time-Series climatology</td></tr>
+    <tr><td>Downloadable products</td><td>Detections CSV · daily-counts CSV · GeoJSON (RangeSearch) · dataset on the Hub</td></tr>
+    <tr><td>Audience — responders, scientists, land managers, firefighters</td><td>TopBrief + alerts rail (responders) · Science Lab (scientists) · Watchlist + fire-weather + outlook (land managers) · AI event cards (firefighters)</td></tr>
+  </table>
+
+  <h4 class="mini">"How do I…?" — quick recipes</h4>
+  <ul class="tight">
+    <li><b>"Is this region abnormal right now?"</b> → TopBrief (alert banner) → Calendar tab →
+    "this month vs historical median" KPI → Time-Series anomaly rings.</li>
+    <li><b>"What is that single fire on the map?"</b> → click the dot → AI event card →
+    "Ask the Analyst about this fire".</li>
+    <li><b>"Get last month's detections for my province."</b> → ⌖ draw the box → RangeSearch →
+    set dates → download detections CSV / GeoJSON.</li>
+    <li><b>"Is fire activity trending up over 26 years?"</b> → Science Lab → Trend significance
+    (Mann-Kendall + Sen's slope) → Memory &amp; persistence (Hurst) → Extremes (return periods).</li>
+    <li><b>"Do MODIS and VIIRS agree here?"</b> → Dynamics scatter (1:1 line) → Science Lab →
+    Sensor agreement (Bland-Altman ratio + LoA) → SensorPanel live ratio.</li>
+    <li><b>"Warn me about fires near my farm."</b> → Watchlist tab → save the place + radius →
+    keep the tab open (5-min recheck) or enable browser / e-mail channels.</li>
+    <li><b>"What kind of fire regime is this?"</b> → Burn Regime tab → prototype badge + distance.</li>
+    <li><b>"Show me the 3D energy structure."</b> → map 🧊 Fire Field or ⛰ Terrain towers → HUD rollup.</li>
+  </ul>
+
+  <p class="body-text" style="margin-top:10px">Accessibility and responsiveness are part of the
+  feature set, not an afterthought: colorblind-safe calendar ramps, <i>aria-pressed</i> /
+  <i>aria-label</i> on controls, listbox semantics, a keyboard-navigable 6-step guided tour
+  (◈ header button, re-runnable, remembered in localStorage), ≥ 40&nbsp;px touch targets, fluid map
+  heights on mobile, popup clamps with inner scroll, safe-area insets — verified with zero console
+  errors and zero horizontal overflow at 1440×900 and iPhone 390×844.</p>
+
+  <h4 class="mini">How the claims in this guide were verified</h4>
+  <div class="card"><div class="c-title">Verification record</div>
+  <p>Every quantitative claim above traces to a runnable check, not a narrative. The science layer
+  is guarded by <b>28/28 synthetic ground-truth tests</b> that plant a known signal — a planted
+  trend for Mann-Kendall, an AR(1) series for the ACF, a 24-month cycle for the periodogram, a
+  3× proportional ratio for Bland-Altman, a gradient field for Moran's I — and assert each method
+  recovers it. The harmonized record is rebuilt reproducibly by the pipeline scripts from the GIBS
+  archive, so the calendar, regime prototypes and emissions estimates can be regenerated and
+  audited by anyone.</p>
+  <p>On the operational side, the 2026-10-29 production audit verified <b>15/15 API endpoints
+  returning 200 with real FIRMS/GIBS/EONET/GDACS data</b>, ran headless-browser sweeps at
+  1440×900 and 390×844 with <b>zero console errors, zero page errors and zero horizontal
+  overflow</b>, and exercised the guided tour, date-range search (46,480 detections in one
+  30-day query), the 26-year calendar and all seven Science Lab sub-tabs against live data.</p></div>
+
+  <h4 class="mini">Where the deeper documentation lives</h4>
+  <table class="tbl">
+    <tr><th style="width:38%">Document (in the repository)</th><th>Covers</th></tr>
+    <tr><td>docs/FEATURES.md</td><td>The same encyclopedia as this guide, kept in-repo and searchable</td></tr>
+    <tr><td>docs/ARCHITECTURE.md</td><td>Renderers, API routes, lib modules, data flow</td></tr>
+    <tr><td>docs/DATA_PIPELINE.md</td><td>How the 26-year harmonized record is built from GIBS</td></tr>
+    <tr><td>docs/JUDGE_SCORECARD.md</td><td>Self-scoring against the official rubric, per round</td></tr>
+    <tr><td>docs/APIS.md · API_EXPANSION.md</td><td>Upstream API catalogue + free-API expansion registry</td></tr>
+  </table>
+
+</div><!-- /main-content -->
+
+<!-- ================= ENDING ================= -->
+<div class="ending">
+  <div class="cv-kicker">Team IGNIS · Bangladesh</div>
+  <div class="end-title" style="margin-top:16px">Every dot tells<br>a <span class="fire">26-year</span><br>story.</div>
+  <p style="color:var(--muted);max-width:500px;margin-top:18px">Built from Bangladesh, where
+  crop-residue fire smoke is a leading driver of Dhaka's winter air-quality crisis — and why the
+  harmonized fire record matters at home, not just in the boreal zone.</p>
+  <div class="links">
+    <a href="https://ignis-spaceapps2026.vercel.app"><b>Live application</b>ignis-spaceapps2026.vercel.app</a>
+    <a href="https://huggingface.co/Nabidnur/ignis-fire-regime-model"><b>Hugging Face — model family &amp; dataset</b>Nabidnur/ignis-fire-regime-model · ignis-fire-calendar</a>
+    <a href="https://github.com/Hisernberg/ignis-spaceapps2026"><b>Source &amp; docs</b>github.com/Hisernberg/ignis-spaceapps2026 (private during judging)</a>
+  </div>
+  <div class="end-foot">
+    <span>NASA Space Apps Challenge 2026 · Challenge #9 — Harmonization of MODIS and VIIRS Hot Spots</span>
+    <span>MIT License · Not endorsed by NASA</span>
+  </div>
+</div>
+
+</body>
+</html>

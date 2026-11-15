@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IGNIS — Complete Feature Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@page { size: 720px 1020px; margin: 0; }
+:root {
+  --bg: #0A1424; --panel: #101E33; --panel2: #0D182B;
+  --text: #E6EDF7; --muted: #8FA3BF;
+  --accent: #F97316; --accent2: #38BDF8;
+  --line: #1D3352;
+}
+html, body {
+  margin: 0; padding: 0; width: 720px;
+  background: var(--bg); color: var(--text);
+  font-family: 'Inter', 'Noto Sans SC', 'Noto Color Emoji', sans-serif;
+  font-size: 13.5px; line-height: 1.62;
+}
+@media screen {
+  html { height: auto; display: flex; justify-content: center; background: #030810; }
+  body { transform-origin: top center; margin: 20px auto; box-shadow: 0 0 60px rgba(0,0,0,.6); }
+}
+p, li, td, .cell { overflow-wrap: break-word; word-break: break-word; }
+* { box-sizing: border-box; }
+
+/* ---------- cover ---------- */
+.cover {
+  width: 720px; height: 1020px; break-after: page; overflow: hidden;
+  position: relative; display: flex; flex-direction: column; justify-content: center;
+  padding: 60px 64px; background:
+    radial-gradient(560px 380px at 82% -6%, rgba(249,115,22,.16), transparent 70%),
+    radial-gradient(640px 420px at -10% 108%, rgba(56,189,248,.10), transparent 70%),
+    var(--bg);
+}
+.cover .orbit { position: absolute; border-radius: 50%; border: 1px solid rgba(249,115,22,.22); }
+.cover .orbit.o1 { width: 300px; height: 300px; top: -110px; right: -80px; }
+.cover .orbit.o2 { width: 190px; height: 190px; top: -30px; right: 60px; border-color: rgba(56,189,248,.20); }
+.cover .grid-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(143,163,191,.13) 1px, transparent 1.4px); background-size: 34px 34px; opacity: .5; }
+.cv-kicker { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .24em; color: var(--accent2); text-transform: uppercase; }
+.cv-kicker::before { content: ''; width: 34px; height: 1px; background: var(--accent2); }
+.cv-title { font-size: 74px; font-weight: 900; line-height: .95; letter-spacing: -.02em; margin: 22px 0 6px; }
+.cv-title .fire { color: var(--accent); }
+.cv-sub { font-size: 21px; font-weight: 700; color: var(--text); margin: 6px 0 18px; }
+.cv-desc { color: var(--muted); max-width: 520px; font-size: 14px; }
+.cv-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; max-width: 100%; }
+.cv-stat { flex: 1 1 auto; min-width: 128px; max-width: 100%; border: 1px solid var(--line); background: rgba(16,30,51,.75); border-radius: 12px; padding: 14px 16px; }
+.cv-stat b { display: block; font-size: 25px; font-weight: 900; color: var(--accent); letter-spacing: -.01em; }
+.cv-stat b.cy { color: var(--accent2); }
+.cv-stat span { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.cv-foot { position: absolute; left: 64px; right: 64px; bottom: 46px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--line); padding-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: .1em; }
+.cv-badge { display: inline-block; border: 1px solid rgba(249,115,22,.5); color: var(--accent); border-radius: 999px; padding: 5px 14px; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; margin-top: 26px; }
+
+/* ---------- flowing content ---------- */
+.main-content { padding: 54px 60px 42px; }
+.chapter-header { break-after: avoid; break-inside: avoid; margin-top: 28px; }
+.chapter-header:first-child { margin-top: 0; }
+.sec-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .26em; color: var(--accent2); text-transform: uppercase; }
+.sec-title { font-size: 27px; font-weight: 900; letter-spacing: -.015em; line-height: 1.15; margin: 6px 0 4px; }
+.sec-title .em { color: var(--accent); }
+.divider { height: 2px; width: 56px; background: linear-gradient(90deg, var(--accent), transparent); margin: 10px 0 14px; border-radius: 2px; }
+.body-text { color: #C6D2E4; margin: 0 0 12px; }
+.body-text b, .card b { color: var(--text); }
+.lead { font-size: 14.5px; color: var(--text); }
+h4.mini { font-size: 13px; font-weight: 800; color: var(--text); margin: 16px 0 8px; letter-spacing: .01em; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; break-inside: avoid; }
+.card .c-title { font-weight: 800; font-size: 14.5px; margin-bottom: 6px; }
+.card .c-title .chip { color: var(--accent); }
+.card p { margin: 0 0 8px; color: #C6D2E4; font-size: 13px; }
+.card p:last-child { margin-bottom: 0; }
+.grid2 { display: flex; flex-wrap: wrap; gap: 14px; max-width: 100%; }
+.grid2 > .card { flex: 1 1 300px; min-width: 280px; max-width: 100%; margin-bottom: 0; }
+.grid2 { margin-bottom: 14px; }
+
+.kv { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; max-width: 100%; }
+.kv span { flex: 0 1 auto; min-width: 60px; max-width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em; color: var(--accent2); border: 1px solid rgba(56,189,248,.35); border-radius: 999px; padding: 3px 10px; background: rgba(56,189,248,.07); }
+
+.console { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10.6px; line-height: 1.75; color: #9FB4D0; margin: 4px 0 14px; break-inside: avoid; white-space: pre-wrap; }
+.console .hl { color: var(--accent); }
+.console .cy { color: var(--accent2); }
+
+table.tbl { width: 100%; border-collapse: collapse; font-size: 11.8px; margin: 6px 0 14px; }
+table.tbl th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent2); border-bottom: 1px solid var(--line); padding: 7px 8px; }
+table.tbl td { border-bottom: 1px solid rgba(29,51,82,.6); padding: 8px; vertical-align: top; color: #C6D2E4; }
+table.tbl td:first-child { color: var(--text); font-weight: 600; }
+table.tbl tr { break-inside: avoid; }
+
+.alert { border-left: 3px solid var(--accent); background: rgba(249,115,22,.07); border-radius: 0 12px 12px 0; padding: 12px 16px; margin: 2px 0 14px; break-inside: avoid; color: #D8E2F0; font-size: 12.8px; }
+.alert .a-k { font-weight: 800; color: var(--accent); }
+.note { border-left: 3px solid var(--accent2); background: rgba(56,189,248,.06); border-radius: 0 12px 12px 0; padding: 12px 16px; margin: 2px 0 14px; break-inside: avoid; color: #D8E2F0; font-size: 12.8px; }
+
+ul.tight { margin: 4px 0 12px; padding-left: 18px; color: #C6D2E4; }
+ul.tight li { margin-bottom: 6px; }
+ul.tight li::marker { color: var(--accent); }
+
+/* ---------- ending ---------- */
+.ending { width: 720px; height: 1020px; break-before: page; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: center; padding: 60px 64px; background: radial-gradient(620px 420px at 110% 8%, rgba(249,115,22,.14), transparent 70%), var(--bg); }
+.end-title { font-size: 44px; font-weight: 900; line-height: 1.05; letter-spacing: -.02em; }
+.end-title .fire { color: var(--accent); }
+.links { margin-top: 30px; }
+.links a { display: block; text-decoration: none; color: var(--text); border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 13px 16px; margin-bottom: 10px; font-size: 13px; }
+.links a b { color: var(--accent2); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+.end-foot { position: absolute; bottom: 46px; left: 64px; right: 64px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 11px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<div class="cover">
+  <div class="grid-dots"></div>
+  <div class="orbit o1"></div><div class="orbit o2"></div>
+  <div class="cv-kicker">NASA Space Apps Challenge 2026 · Challenge #9</div>
+  <div class="cv-title">IGNIS<br><span class="fire">Fire Calendar</span></div>
+  <div class="cv-sub">Complete Feature Guide — every panel, method and control</div>
+  <div class="cv-desc">One 26-year burning-activity record built from NASA's split MODIS + VIIRS
+  archive — segmented, calibrated, forecast, and served as an early-warning mission console.
+  This guide documents every feature in the live application: what it is, how to use it, and
+  where its data comes from.</div>
+  <div class="cv-badge">Harmonization of MODIS &amp; VIIRS Hot Spots</div>
+  <div class="cv-stats">
+    <div class="cv-stat"><b class="cy">26 yr</b><span>Harmonized record</span></div>
+    <div class="cv-stat"><b>11</b><span>Analysis tabs</span></div>
+    <div class="cv-stat"><b class="cy">15/15</b><span>APIs live</span></div>
+    <div class="cv-stat"><b>4+1</b><span>Custom models</span></div>
+  </div>
+  <div class="cv-foot">
+    <span>ignis-spaceapps2026.vercel.app</span>
+    <span>EDITION 2026-11 · TEAM IGNIS · BANGLADESH</span>
+  </div>
+</div>
+
+<!-- ================= FLOWING CONTENT ================= -->
+<div class="main-content">
+
+  <!-- 01 -->
+  <div class="chapter-header">
+    <div class="sec-tag">01 · The mission</div>
+    <div class="sec-title">Why IGNIS exists</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text lead">NASA's two flagship fire instruments are split across two eras and
+  two scales. <b>MODIS</b> (1&nbsp;km resolution) has flown on Terra since 2000 and Aqua since 2002;
+  <b>VIIRS</b> (375&nbsp;m) began on S-NPP in 2012 and continues on NOAA-20 (2018) and NOAA-21 (2023).
+  A fire small enough for VIIRS to see can be invisible to MODIS — so the <i>same landscape</i>
+  produces wildly different detection counts depending on which satellite you ask. That split
+  record breaks every long-term analysis: 26 years of MODIS cannot be compared to 14 years of
+  VIIRS without harmonization.</p>
+  <p class="body-text">IGNIS answers the challenge statement — <i>Harmonization of MODIS and VIIRS
+  Hot Spots</i> — with a single, continuous, calibrated <b>Burning Activity Calendar</b> from 2000
+  to today, then layers everything an early-warning user actually needs on top: boundary-identified
+  fire clusters, persistent-system tracking, daily dynamics, fire-weather fusion, impact
+  accounting, personal alerting, and a grounded AI analyst that writes incident-style situation
+  reports. Every number in the product is computed from the live record or a labeled, versioned
+  dataset — nothing is decorative, nothing is invented.</p>
+  <div class="kv"><span>Goal 1 — Harmonization</span><span>Goal 2 — Web application</span><span>Colorblind-safe ramps</span><span>Downloadable products</span></div>
+  <p class="body-text">The official brief asks for three concrete deliverables: a harmonized
+  record (Goal 1), a web application where a user picks a region and date range and receives the
+  fire history, trend and abnormality calendar (Goal 2), and downloadable products with accessible
+  color ramps. Section 12 maps every IGNIS feature to those deliverables line by line.</p>
+
+  <!-- 02 -->
+  <div class="chapter-header">
+    <div class="sec-tag">02 · The console</div>
+    <div class="sec-title">Mission-control layout &amp; regions</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">IGNIS is a single-page <b>mission control</b> modeled on the consoles fire
+  analysts actually use — NASA Worldview, Zoom Earth, Windy and nullschool. One map, one summary
+  line, one rail of live indicators, and a deep analytics workspace behind it. The design contract
+  is simple: <b>the map is the hero</b>. Every overlay collapses to a compact chip by default and
+  expands on demand, the map can go fullscreen without touching the page grid, and every panel is
+  one click away.</p>
+  <div class="console"><span class="cy">┌ IGNIS header</span> — region selector · search · ⌖ custom box · ◈ tour · AI
+<span class="cy">├ TopBrief</span> — one-line live summary + EARLY ALERT banner
+<span class="cy">├ THE LIVING FIRE MAP</span> (2D/3D)  <span class="hl">│</span>  <span class="cy">early-warning rail</span>
+<span class="cy">│</span>  basemaps · overlays · hexbin    <span class="hl">│</span>  rule alerts · fire weather
+<span class="cy">│</span>  replay · hotspot → AI card      <span class="hl">│</span>  GDACS · ReliefWeb · sensors
+<span class="cy">├ RangeSearch</span> — date-range search · CSV / GeoJSON downloads
+<span class="cy">├ 11 analysis tabs</span> — calendar · impact · watchlist · clusters · dynamics
+<span class="cy">│</span>                    timeseries · science · outlook · regime · method · hub
+<span class="cy">└ StatusRail</span> — live health of every upstream system</div>
+
+  <h4 class="mini">Regions &amp; the AOI selector</h4>
+  <p class="body-text">The selector in the header defines where <i>every</i> panel looks. Nine
+  curated regions are chosen for fire-signal diversity — Amazon, Congo, Siberia, Boreal North
+  America, California, Mediterranean, Australia, Southeast Asia — plus a <b>Bangladesh spotlight</b>,
+  the team's home region, with six sub-AOIs that surface the Boro rice-residue burning season
+  (March–April) exactly as it emerges from the real NASA record. Two mechanisms make the whole
+  planet available: <b>search any place on Earth</b> (an OSM Nominatim proxy geocoder flies the
+  map there and refetches every panel) and <b>⌖ draw a custom box</b> directly on the map. The
+  drawn box is a first-class AOI: the 26-year calendar, the science lab and the downloads all
+  recalculate for it, which is precisely the "region + date → fire history" flow the brief asks
+  for. A Wikipedia-powered <b>RegionContext</b> placard quietly answers "what am I looking at?"
+  for whatever region is active.</p>
+
+  <h4 class="mini">TopBrief — the five-second answer</h4>
+  <p class="body-text">One computed sentence sits at the top of the console — detections in the
+  last 24 hours, total fire radiative power, the MODIS/VIIRS split — plus an <b>EARLY ALERT
+  banner</b> that escalates GREEN → AMBER → ORANGE → RED from live FRP and density. The summary is
+  produced by a deterministic rule engine, never an LLM, so it cannot hallucinate and never
+  blocks: if every AI endpoint on Earth went dark, the brief would still be perfect. The alert
+  strip only appears at ORANGE/RED, auto-dismisses, and carries a breathing severity beacon.</p>
+
+  <!-- 03 -->
+  <div class="chapter-header">
+    <div class="sec-tag">03 · The map</div>
+    <div class="sec-title">The living fire map</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">The map is IGNIS's heart: a NASA GIBS WMTS basemap with the live fire
+  record drawn on top. It runs on <b>two independent renderers</b> chosen by a WebGL2 capability
+  probe that executes <i>before</i> the GL map is ever constructed. Modern browsers get MapLibre
+  GL with GPU acceleration; browsers with blocked GPUs (Brave strict shields, VMs, headless CI
+  runners) get the Leaflet fallback with zero WebGL — a full interactive map instead of the
+  <i>GPUInitializationError</i> crash that originally motivated the design. The escape hatch
+  <b>?nogpu=1</b> forces the fallback for support and automated screenshots.</p>
+
+  <div class="card"><div class="c-title">The BLAZE fire-dot engine <span class="chip">· v8</span></div>
+  <p>The Leaflet renderer replaced ~75k per-point markers with <b>one custom canvas layer</b>:
+  a pre-rendered radial-gradient sprite cache (glow / core / night / white-hot) composited with an
+  additive "lighter" glow pass for real fire optics, an FRP-ascending paint order so the hottest
+  fires draw last and stay visible, DPR-crisp retina rendering, and viewport culling with a
+  30,000-detection cap.</p>
+  <p>Colors follow the <b>proper-red ramp</b>: every detection reads as a red fire dot at any zoom —
+  pale red for small burns deepening to crimson with FRP — instead of an old yellow→red ramp in
+  which small fires washed out against bright basemaps. Size scales with √FRP; detections above
+  150&nbsp;MW get white-hot cores; night-mode sprites key off acquisition time.</p></div>
+
+  <div class="card"><div class="c-title">Every dot is interactive <span class="chip">· spatial index</span></div>
+  <p>A uniform-grid spatial index (0.05° cells) makes <b>every hotspot hoverable and clickable at
+  any zoom</b> — hover shows an rAF-throttled tooltip; click opens the full <b>AI event card</b>:
+  threat badge (LOW → EXTREME), fire-type classification, a 6-hour spread forecast upgraded by
+  live wind, smoke &amp; air context, a CO₂e estimate, and a one-tap handoff that carries the
+  card's telemetry into the AI Analyst. Pulses, ember drift, fire-front blooms and spread rings
+  animate over active clusters; an additive <b>heatmap mode</b> renders the same detections as a
+  density surface; a hexbin layer aggregates them into hexagonal bins.</p></div>
+
+  <h4 class="mini">Color modes &amp; layers</h4>
+  <ul class="tight">
+    <li><b>Four style modes</b> recolor every detection: <b>intensity</b> (FRP ramp), <b>sensor</b>
+    (MODIS vs VIIRS hues — the harmonization story at a glance), <b>confidence</b> (low/nominal/high)
+    and <b>heatmap</b> (density surface). The GL path adds a fires-ember underglow (FRP ≥ 45&nbsp;MW)
+    so mid-size fires read as live embers.</li>
+    <li><b>NASA GIBS basemaps</b>, date-synced to the selected day: true color, <b>7-2-1 false
+    color</b> (burn scars read magenta) and Blue Marble.</li>
+    <li><b>MOD11 LST</b> land-surface-temperature overlay using the official LP DAAC V6 decode
+    (LST = stored × 0.02&nbsp;K, QA bits decoded right→left) with the official hot-red / cold-blue palette.</li>
+    <li><b>GIBS fire-pixel vector tiles</b> — an independent NASA pipeline cross-checking FIRMS on
+    the same night.</li>
+    <li><b>Wind streamlines</b> (the nullschool signature, on by default) drawn live from Open-Meteo
+    and dimming automatically while an AI event card is open; <b>RainViewer</b> radar and cloud
+    frames fetched on demand so the map stays clean until asked.</li>
+    <li><b>Windy-style master opacity slider</b> with per-layer base opacities, plus a
+    <b>🔮 next-day risk field</b> overlay from the footprint-forecaster model (section 10).</li>
+  </ul>
+
+  <h4 class="mini">Time travel &amp; focus</h4>
+  <p class="body-text">A 24H / 48H / 7D window switcher and a <b>7-day replay</b> step the record
+  day by day with persistent fire-system tracking (nearest-centroid matching + FRP trend): you can
+  watch a complex ignite, merge and burn out across the week. <b>⛶ Focus mode</b> locks page scroll,
+  resizes the renderer to the full viewport, re-measures on every geometry change, and exits with
+  Esc — a true fullscreen map without leaving the page.</p>
+
+  <!-- 04 -->
+  <div class="chapter-header">
+    <div class="sec-tag">04 · The third dimension</div>
+    <div class="sec-title">3D modes — 🧊 Fire Field &amp; ⛰ Terrain towers</div>
+    <div class="divider"></div>
+  </div>
+  <p class="body-text">Two WebGL-first 3D views share the map's date, AOI and sensor filters, and
+  each carries a GPU-free fallback so 3D never hard-fails. <b>🧊 Fire Field</b> extrudes detections
+  as a volumetric fire field over a dark grid, with height and brightness following FRP; where
+  WebGL is unavailable it degrades to an isometric canvas fire field carrying the same information.
+  <b>⛰ Terrain towers</b> renders detections as 3D towers over a Three.js terrain scene, and the GL
+  path adds a terrain/extrusion feel to the main map camera. A live threat rollup in the HUD stays
+  visible while you orbit. The point is legibility: judges and responders alike read which complex
+  carries the energy faster in 3D than in any 2D color ramp.</p>

@@ -1,0 +1,87 @@
+<!-- ============ S15 WAR SCHEDULE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 15 // THE 48-HOUR WAR SCHEDULE</div>
+    <div class="sec-title">Hour by Hour, Portion by Portion</div>
+    <p class="sec-lede">Sleep is a portion. The video is a portion. Nothing is optional.</p>
+</div>
+
+<table>
+    <colgroup><col style="width:16%"><col style="width:26%"><col style="width:34%"><col style="width:24%"></colgroup>
+    <thead><tr><th>HOURS</th><th>BLOCK</th><th>PORTIONS &amp; FOCUS</th><th>GATE AT BLOCK END</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">H0&ndash;H1</td><td><b>Read the field</b></td><td>Verify briefs vs dossier; run the three data pings (FIRMS NRT+archive, GIBS tile, one NASA variable series)</td><td>Default pick stands: PYROCHRON</td></tr>
+        <tr><td class="mono">H1&ndash;H2</td><td><b>Commit the challenge</b></td><td>Register project under #09; task cards filed as issues for P0&ndash;P3</td><td><b>SWAP RIGHTS EXPIRE</b></td></tr>
+        <tr><td class="mono">H2&ndash;H8</td><td><b>Foundation</b></td><td>P0 setup + P1 ingest (DATA session leads; FRONTEND session scaffolds in parallel)</td><td>CI green; parquet artifacts exist</td></tr>
+        <tr><td class="mono">H8&ndash;H14</td><td><b>SLEEP + buffer</b></td><td>Hard block; let archive backfill and any queued runs finish</td><td>Wake to green, or fix-forward</td></tr>
+        <tr><td class="mono">H14&ndash;H20</td><td><b>Science</b></td><td>P2 harmonize: k-table, FAI, climatology, validation r</td><td>Global r &ge; 0.6 printed in log</td></tr>
+        <tr><td class="mono">H20&ndash;H24</td><td><b>Products</b></td><td>P3 build + commit products; FRONTEND session finishes shell (P4) in parallel</td><td>Products in repo; preview URL live</td></tr>
+        <tr><td class="mono">H24&ndash;H32</td><td><b>Hero</b></td><td>P5 calendar grid to demo quality; P6 explorer behind it</td><td><b>90-second judge demo passes</b></td></tr>
+        <tr><td class="mono">H32&ndash;H38</td><td><b>SLEEP + buffer</b></td><td>Hard block; scheduled runs keep the site fresh</td><td>Wake to a live, fresh site</td></tr>
+        <tr><td class="mono">H38&ndash;H42</td><td><b>Alive</b></td><td>P7 automation: cron cadence, Telegram digest, threshold alarms, latency claim</td><td>Digest lands on the phone</td></tr>
+        <tr><td class="mono">H42&ndash;H45</td><td><b>Proof</b></td><td>P8 QA sweep via Playwright MCP; i18n pass; methodology page final</td><td>QA checklist green, console clean</td></tr>
+        <tr><td class="mono">H45&ndash;H48</td><td><b>Submit</b></td><td>P9 video per storyboard, project page, README, form, final verify in anonymous browser</td><td><b>SUBMITTED WITH BUFFER</b></td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">RHYTHM REMINDERS</div>
+    Three chat windows stay assigned: DATA owns <span class="mono">scripts/ + workflows</span>, FRONTEND owns the app, QA owns issues/docs/pitch. Every block ends on a commit; every red test reverts rather than lingers; every new idea goes to <span class="mono">parking-lot.md</span>, never into scope.
+</div>
+
+<!-- ============ S16 RISK + PROMPTS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 16 // RISK REGISTER &amp; PROMPT LIBRARY</div>
+    <div class="sec-title">Pre-Agreed Answers to the Weekend&rsquo;s Bad Nights</div>
+    <p class="sec-lede">Every failure mode has a named fallback; every fallback has a prompt already written.</p>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-tag">RISK // FIRMS API</div>
+        <div class="card-title">Day-range cap or rate limit blocks NRT pulls</div>
+        <div class="card-body"><b>Fallback:</b> loop smaller windows per AOI and cache responses in artifacts; if the API degrades fully, the committed archive spine plus last good NRT delta still powers the entire demo &mdash; the site never depends on a live call.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // VIIRS RECORD</div>
+        <div class="card-title">Sensor outage or gaps distort recent weeks</div>
+        <div class="card-body"><b>Fallback:</b> the anomaly engine marks weeks with &lt;80% expected passes as <span class="mono">low-confidence</span> in products; UI grays them; the digest skips flagged weeks &mdash; honesty rendered as behavior.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // CI</div>
+        <div class="card-title">Actions queue delays or 60-day cron disable</div>
+        <div class="card-body"><b>Fallback:</b> manual <span class="mono">workflow_dispatch</span> does everything cron does (demo the manual path); event weekend is fresh activity so disable rules are moot; queue delay is absorbed by the 6-hour cadence design.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // SCOPE</div>
+        <div class="card-title">Feature creep eats the video window</div>
+        <div class="card-body"><b>Fallback:</b> the H42 gate fires regardless of feature state &mdash; P9 starts on time because a submitted 90% beats an unsubmitted 100%. Parking-lot items are named in the project page as future work (judges read ambition as maturity).</div>
+    </div>
+</div>
+
+<div class="sub-title"><span class="num">16.1</span> Prompt Library &mdash; Six Skeletons Worth Pre-Writing</div>
+<table>
+    <colgroup><col style="width:22%"><col style="width:44%"><col style="width:34%"></colgroup>
+    <thead><tr><th>SKELETON</th><th>STRUCTURE</th><th>USED IN</th></tr></thead>
+    <tbody>
+        <tr><td><b>Bootstrap</b></td><td>&ldquo;Write {artifact} for a public repo; constraints: {list}; cite the platform rule that motivates each constraint.&rdquo;</td><td>P0 workflows, proxy function</td></tr>
+        <tr><td><b>Ingest</b></td><td>&ldquo;Write {script} reading {source}, mapping to {schema}, retry &times;5 backoff, print row counts per {group}; stdlib + pandas + requests only.&rdquo;</td><td>P1, any new connector</td></tr>
+        <tr><td><b>Spec-implement</b></td><td>&ldquo;Implement this spec verbatim: {pseudocode}. CONFIG dict first, pure functions after, main() orchestrates, no plotting.&rdquo;</td><td>P2, P3</td></tr>
+        <tr><td><b>Component</b></td><td>&ldquo;Build {component} from {json} with typed props, dark tokens, aria labels, keyboard support, no chart libs; state in URL params.&rdquo;</td><td>P4&ndash;P6</td></tr>
+        <tr><td><b>Debug loop</b></td><td>&ldquo;Here is the file: {paste}. Here is the verbatim error: {paste}. Fix minimally, return the full file, explain the cause in one line.&rdquo;</td><td>Everywhere, all weekend</td></tr>
+        <tr><td><b>QA sweep</b></td><td>&ldquo;Via Playwright MCP: snapshot {routes} at {widths}, list console errors, missing aria, overflow; ranked fix list with file paths.&rdquo;</td><td>P8, pre-demo checks</td></tr>
+    </tbody>
+</table>
+
+</div><!-- /main-content -->
+
+<!-- ==================== PDF2 ENDING ==================== -->
+<div class="ending">
+    <div class="stars"></div>
+    <div class="end-tag">END OF BUILD BIBLE // SP-2026-007</div>
+    <div class="end-big"><div>BUILD IT PORTION</div><div>BY PORTION.</div><div class="hl">SHIP IT HOUR BY HOUR.</div></div>
+    <div class="end-text">Ten portions stand between an empty repository and a global-award submission: armed infrastructure, flowing data, proven science, a hero screen judges can verify in ninety seconds, a pipeline that keeps working while you sleep, and a submission kit finished with hours to spare. The plan is total. The only remaining variable is execution.</div>
+    <div class="end-final">
+        <span>SUITE: SP-2026-001 &#9670; 002 &#9670; 003 &#9670; 006 &#9670; 007</span>
+        <span>MISSION COMMAND OUT</span>
+    </div>
+</div>

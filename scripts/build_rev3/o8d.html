@@ -1,0 +1,56 @@
+
+<!-- ============ S5 FINALIZED PORTFOLIO ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 05 // FINALIZED PORTFOLIO</div>
+    <div class="sec-title">Three Challenges, One Corridor, Confirmed</div>
+    <p class="sec-lede">The REV 2 re-scoring survives contact with the verified arsenal &mdash; in fact the numbers widen the lead.</p>
+</div>
+
+<p class="body-text">The portfolio decision was made in SP-2026-006 under the chat-only re-scoring, and today&rsquo;s verification changes nothing about the ranking while strengthening the case for the top pick. PYROCHRON (challenge #9, harmonization of MODIS and VIIRS hot spots) scored 8.80 under the AI-native solo adjustment &mdash; the widest margin in the suite &mdash; because its heaviest asset, a two-decade multi-sensor fire record, is reachable through exactly the corridor now proven live: FIRMS area API plus Actions cron. PULSE (challenge #2, Earth system trend detective) holds 7.70 on the strength of keyless POWER pulls already demonstrated with 578-day series. ROOTLOGIC (challenge #7, field shift) holds 7.55 as the alternate with the strongest human story. Challenge #4 (CLPS lunar browser) remains the designated reserve with a clearly-defined swap trigger.</p>
+
+<table>
+    <colgroup><col style="width:20%"><col style="width:14%"><col style="width:33%"><col style="width:33%"></colgroup>
+    <thead><tr><th>PROJECT</th><th>SCORE</th><th>ROLE IN PORTFOLIO</th><th>ARSENAL FIT (VERIFIED TODAY)</th></tr></thead>
+    <tbody>
+        <tr><td><b>PYROCHRON</b><br><span class="mono">#9 fire calendar</span></td><td class="wp">8.80</td><td>FLAGSHIP &mdash; all effort until P9 deploy; award target: Best Use of Data</td><td>FIRMS 5,000-txn budget proven by real runner pull; GIBS fire layers; EONET cross-links</td></tr>
+        <tr><td><b>PULSE</b><br><span class="mono">#2 trend detective</span></td><td class="wp">7.70</td><td>TWIN PIVOT &mdash; shares the statistics engine; award target: Best Use of Science</td><td>POWER keyless series proven (578 days); GISTEMP / sea-level / sea-ice CSVs keyless</td></tr>
+        <tr><td><b>ROOTLOGIC</b><br><span class="mono">#7 field shift</span></td><td class="wp">7.55</td><td>ALTERNATE &mdash; build only if flagship freezes early; award: storytelling angle</td><td>POWER ag community parameters; SoilGrids keyless; same UI chassis</td></tr>
+        <tr><td><b>CLPS BROWSER</b><br><span class="mono">#4 reserve</span></td><td class="wp">7.50</td><td>RESERVE &mdash; activate only on swap trigger defined in SP-2026-006 &sect;re-selection</td><td>JPL Horizons keyless; no further registration needed</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">PORTFOLIO DOCTRINE // ONE CORRIDOR, THREE PASSENGERS</div>
+    All three projects ride the identical infrastructure &mdash; same vault, same Actions cron pattern, same static-JSON-CDN shape, same deterministic-statistics smart layer. That is the quiet strategic point: building the corridor once (today, done) means each additional project costs only its own science and UI, not new plumbing. Effort ratio across the event stays 80/15/5, flagship first.
+</div>
+
+<!-- ============ S6 EXECUTION DOCTRINE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 06 // FINALIZED EXECUTION DOCTRINE</div>
+    <div class="sec-title">Portion by Portion, Session by Session</div>
+    <p class="sec-lede">The build loop is fixed: open session &rarr; paste header + portion prompt &rarr; accept files &rarr; run locally &rarr; commit &rarr; close session.</p>
+</div>
+
+<p class="body-text">Execution converts SP-2026-007&rsquo;s portion contracts into concrete chat sessions, now armed with real credentials. Every session opens with the same SESSION HEADER (Section 10 of this order and &sect;7 of the playbook) so the assistant inherits the full context &mdash; project, stack, constraints, output rules &mdash; and then receives exactly one portion prompt. The assistant writes complete files; the operator saves them into the working tree, runs the acceptance commands, and commits with the portion ID. Nothing runs overnight, nothing needs a local model, and every acceptance test is a command with visible output. The portion map below is the campaign&rsquo;s master tracker; the playbook file carries the same list with copy-paste prompts.</p>
+
+<table>
+    <colgroup><col style="width:12%"><col style="width:36%"><col style="width:30%"><col style="width:22%"></colgroup>
+    <thead><tr><th>PORTION</th><th>DELIVERABLE</th><th>ACCEPTANCE TEST</th><th>STATUS</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">P0&ndash;P1</td><td>Bootstrap repo + data layer: FIRMS history pulls, harmonization to monthly JSON</td><td><span class="mono">firms_pull.py</span> emits california series 2000&ndash;2026</td><td class="mono">scripts verified &mdash; READY</td></tr>
+        <tr><td class="mono">P2</td><td>Site shell: Astro static, Mission Control dark, MapLibre globe + GIBS layer</td><td>build + preview render calendar and globe</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P3</td><td>Calendar view: monthly cells colored by harmonized-count z-score, day drill-down</td><td>hydrates from data/history/global.json</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P4</td><td>Map explore: timeline scrubber, FIRMS WMS overlay, AOI selector, popups</td><td>scrub 2024-08 &rarr; CA fires visible</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P5</td><td>Trend Lab: Mann-Kendall + Sen + bootstrap CI in pure JS, verdict cards</td><td>unit tests pass against fixtures</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P6</td><td>Alert Lab: 7-day anomaly rule vs trailing 30-day &sigma;, exportable PNG card</td><td>card exports from live data</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P7</td><td>Story mode: five curated case files with map, verdict, EONET links</td><td>all five render from committed JSON</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P8</td><td>Polish: a11y, mobile, skeletons, no-key audit (grep), data-as-of badge</td><td>grep finds zero secrets in dist/</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">P9</td><td>Deploy: Pages workflow, Lighthouse &ge; 90, offline demo bundle</td><td>two devices render end-to-end</td><td class="mono">READY</td></tr>
+        <tr><td class="mono">S4a&ndash;c</td><td>PULSE: series catalog + detective UI + cross-case board (twin pivot)</td><td>10 series hydrate; verdict cards print</td><td class="mono">READY</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">SESSION DISCIPLINE // THE THREE LAWS</div>
+    <b>1. One portion per session</b> &mdash; drift beyond it and context quality collapses; reopen instead. <b>2. Commit after every accepted portion</b> &mdash; git is the shared memory between sessions, and the commit log doubles as the build story for the submission page. <b>3. Frontend never touches keys</b> &mdash; every portion&rsquo;s acceptance includes the grep audit; a key found in dist/ is an instant rejection and rework.
+</div>

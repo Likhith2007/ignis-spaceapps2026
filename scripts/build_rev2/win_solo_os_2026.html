@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WIN SOLO / PYROCHRON BUILD BIBLE — REV 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ MISSION CONTROL DARK DESIGN SYSTEM ============ */
+@page {
+    size: 720px 1020px;
+    margin: 0;
+}
+:root {
+    --bg: #070B14;
+    --panel: #0E1626;
+    --panel2: #101B30;
+    --ink: #E7EEF9;
+    --dim: #8CA0BE;
+    --cy: #38BDF8;
+    --line: rgba(56, 189, 248, 0.18);
+    --line2: rgba(140, 160, 190, 0.14);
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 720px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.66;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+body {
+    line-break: strict;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+p, td, li {
+    line-break: strict;
+    text-align: justify;
+}
+@media screen {
+    html {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        background: #03060C;
+    }
+    body {
+        margin: 24px auto;
+        box-shadow: 0 0 60px rgba(56,189,248,0.12);
+    }
+}
+.mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+/* ============ COVER ============ */
+.cover {
+    width: 720px;
+    height: 1020px;
+    box-sizing: border-box;
+    break-after: page;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 60px;
+    background:
+        radial-gradient(circle at 612px 82px, transparent 276px, rgba(56,189,248,0.16) 277px 279px, transparent 280px),
+        radial-gradient(circle at 630px 172px, transparent 186px, rgba(56,189,248,0.10) 187px 189px, transparent 190px),
+        radial-gradient(circle at 42px 952px, transparent 146px, rgba(56,189,248,0.14) 147px 149px, transparent 150px),
+        radial-gradient(circle at 512px 143px, rgba(56,189,248,0.55) 0 6px, transparent 9px),
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(56,189,248,0.14), transparent 60%),
+        radial-gradient(ellipse 70% 45% at 85% 108%, rgba(56,189,248,0.10), transparent 60%),
+        var(--bg);
+}
+.cover .stars {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 12% 22%, rgba(231,238,249,0.7) 50%, transparent 51%),
+        radial-gradient(1px 1px at 28% 68%, rgba(231,238,249,0.45) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 44% 12%, rgba(231,238,249,0.6) 50%, transparent 51%),
+        radial-gradient(1px 1px at 62% 82%, rgba(231,238,249,0.4) 50%, transparent 51%),
+        radial-gradient(1px 1px at 76% 34%, rgba(231,238,249,0.65) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 88% 58%, rgba(231,238,249,0.5) 50%, transparent 51%),
+        radial-gradient(1px 1px at 8% 78%, rgba(231,238,249,0.5) 50%, transparent 51%),
+        radial-gradient(1px 1px at 55% 45%, rgba(231,238,249,0.35) 50%, transparent 51%);
+}
+.cover-topline {
+    position: absolute; top: 42px; left: 60px; right: 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim);
+}
+.cover-topline .dot { color: var(--cy); }
+.cover-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 3px;
+    color: var(--cy); border: 1px solid var(--line); padding: 8px 14px;
+    width: fit-content; margin-bottom: 30px;
+    background: rgba(56,189,248,0.06);
+}
+.cover-title {
+    font-size: 74px; font-weight: 700; line-height: 1.04;
+    letter-spacing: -1.5px; margin: 0 0 22px 0;
+    text-align: left;
+}
+.cover-title .hl { color: var(--cy); }
+.cover-sub {
+    font-size: 16.5px; line-height: 1.55; color: var(--dim);
+    max-width: 500px; margin-bottom: 42px; text-align: left;
+}
+.cover-stats { display: flex; flex-wrap: wrap; gap: 12px; max-width: 100%; }
+.cover-stat {
+    flex: 1 1 150px; min-width: 150px; max-width: 100%;
+    border: 1px solid var(--line2); background: rgba(14,22,38,0.72);
+    padding: 14px 16px; box-sizing: border-box;
+}
+.cover-stat .k {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim); margin-bottom: 6px;
+}
+.cover-stat .v { font-size: 19px; font-weight: 700; color: var(--ink); }
+.cover-stat .v em { color: var(--cy); font-style: normal; }
+.cover-bottomline {
+    position: absolute; bottom: 44px; left: 60px; right: 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim);
+    border-top: 1px solid var(--line2); padding-top: 16px;
+}
+
+/* ============ MAIN CONTENT (single flowing container) ============ */
+.main-content {
+    padding: 52px 58px 40px 58px;
+}
+.chapter-header {
+    break-after: avoid;
+    break-inside: avoid;
+    margin-top: 26px;
+    margin-bottom: 14px;
+}
+.chapter-header.first { margin-top: 0; }
+.sec-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 3px; color: var(--cy); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+}
+.sec-tag::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.sec-title {
+    font-size: 25px; font-weight: 700; line-height: 1.15;
+    letter-spacing: -0.3px; margin: 0 0 6px 0;
+    text-align: left;
+}
+.sec-lede {
+    font-size: 13.5px; color: var(--dim); margin: 6px 0 0 0; text-align: left;
+}
+.sub-title {
+    font-size: 15.5px; font-weight: 600; margin: 18px 0 8px 0;
+    break-after: avoid; display: flex; align-items: center; gap: 8px;
+    text-align: left;
+}
+.sub-title .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    border: 1px solid var(--line); padding: 2px 7px;
+}
+.body-text { margin: 0 0 11px 0; }
+.body-text b, .card b { color: var(--cy); font-weight: 600; }
+.strong { color: var(--ink); font-weight: 600; }
+
+/* ============ CARDS & PANELS ============ */
+.card {
+    break-inside: avoid;
+    border: 1px solid var(--line2);
+    background: var(--panel);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+.card .card-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 6px;
+}
+.card .card-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; text-align: left; }
+.card .card-body { font-size: 12px; color: var(--dim); text-align: left; }
+.card .card-body b { color: var(--ink); font-weight: 600; }
+.grid-2 { display: flex; flex-wrap: wrap; gap: 12px; max-width: 100%; margin-bottom: 12px; }
+.grid-2 > .card { flex: 1 1 280px; min-width: 260px; max-width: 100%; margin-bottom: 0; }
+
+.callout {
+    break-inside: avoid;
+    border-left: 3px solid var(--cy);
+    background: rgba(56,189,248,0.07);
+    padding: 12px 16px;
+    margin: 12px 0 14px 0;
+    font-size: 12.5px;
+}
+.callout .co-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 4px;
+}
+
+/* ============ STAT ROWS ============ */
+.stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; max-width: 100%; break-inside: avoid; }
+.stat {
+    flex: 1 1 130px; min-width: 120px; max-width: 100%;
+    border: 1px solid var(--line2); background: var(--panel);
+    padding: 12px 14px; box-sizing: border-box;
+}
+.stat .v { font-size: 22px; font-weight: 700; color: var(--cy); line-height: 1.1; margin-bottom: 4px; }
+.stat .k { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--dim); line-height: 1.4; }
+
+/* ============ TABLES ============ */
+table {
+    width: 100%; border-collapse: collapse; margin: 10px 0 14px 0;
+    font-size: 11.5px; table-layout: fixed;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px;
+    color: var(--cy); text-align: left; padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(56,189,248,0.05);
+}
+td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line2);
+    vertical-align: top; color: var(--ink); text-align: left;
+    overflow-wrap: break-word;
+}
+td .mono { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dim); }
+td .m2 { color: var(--cy); }
+.tbl-note { font-size: 10.5px; color: var(--dim); font-family: 'JetBrains Mono', monospace; margin: -8px 0 12px 0; }
+.tbl-wrap-keep { break-inside: avoid; }
+
+/* ============ LISTS ============ */
+ul.tick, ol.tick { margin: 6px 0 12px 0; padding-left: 18px; }
+ul.tick li, ol.tick li {
+    margin-bottom: 6px; break-inside: avoid; text-align: left;
+    font-size: 12.5px;
+}
+ul.tick li::marker { color: var(--cy); }
+ol.tick li::marker { color: var(--cy); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+/* ============ TIMELINE / PHASES ============ */
+.phase {
+    break-inside: avoid;
+    border: 1px solid var(--line2); background: var(--panel);
+    margin-bottom: 12px; padding: 0;
+}
+.phase-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; border-bottom: 1px solid var(--line2);
+    background: rgba(56,189,248,0.05);
+}
+.phase-head .ph-time {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 700; color: var(--cy); letter-spacing: 1px;
+}
+.phase-head .ph-name { font-size: 13.5px; font-weight: 600; }
+.phase-body { padding: 11px 16px 6px 16px; font-size: 12px; color: var(--dim); text-align: left; }
+.phase-body ul { margin: 0 0 8px 0; padding-left: 16px; }
+.phase-body li { margin-bottom: 4px; font-size: 12px; }
+.phase-body li b { color: var(--ink); }
+.phase-gate {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    border-top: 1px dashed var(--line2); padding: 8px 16px; letter-spacing: 1px;
+}
+
+/* ============ ARCHITECTURE DIAGRAM ============ */
+.arch { margin: 14px 0; }
+.arch-layer {
+    border: 1px solid var(--line); background: rgba(56,189,248,0.04);
+    padding: 10px 14px; break-inside: avoid;
+}
+.arch-conn {
+    display: flex; justify-content: center; gap: 60px;
+    font-family: 'JetBrains Mono', monospace; color: var(--cy);
+    font-size: 12px; line-height: 1; padding: 5px 0;
+    break-inside: avoid; break-after: avoid;
+}
+.arch-ltitle {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 8px;
+}
+.arch-nodes { display: flex; flex-wrap: wrap; gap: 8px; max-width: 100%; }
+.arch-node {
+    flex: 1 1 130px; min-width: 120px; max-width: 100%;
+    border: 1px solid var(--line2); background: var(--panel2);
+    padding: 8px 10px; text-align: left; box-sizing: border-box;
+}
+.arch-node .n { font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.arch-node .d { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); line-height: 1.5; }
+
+/* ============ CHECKLIST ============ */
+.check { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px 0; max-width: 100%; }
+.check-item {
+    flex: 1 1 320px; min-width: 280px; max-width: 100%;
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--line2); background: var(--panel);
+    padding: 10px 12px; font-size: 11.5px; color: var(--dim);
+    break-inside: avoid; text-align: left; box-sizing: border-box;
+}
+.check-item .bx {
+    flex-shrink: 0; width: 13px; height: 13px; border: 1px solid var(--cy);
+    margin-top: 2px; background: rgba(56,189,248,0.08);
+}
+.check-item b { color: var(--ink); font-weight: 600; }
+
+/* ============ ENDING ============ */
+.ending {
+    width: 720px; height: 1020px; box-sizing: border-box;
+    break-before: page; position: relative;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 60px;
+    background:
+        radial-gradient(circle at 360px 1148px, transparent 306px, rgba(56,189,248,0.14) 307px 309px, transparent 310px),
+        radial-gradient(circle at 360px 1148px, transparent 206px, rgba(56,189,248,0.09) 207px 209px, transparent 210px),
+        radial-gradient(ellipse 90% 50% at 50% 115%, rgba(56,189,248,0.16), transparent 65%),
+        var(--bg);
+}
+.ending .stars {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 18% 28%, rgba(231,238,249,0.6) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 36% 72%, rgba(231,238,249,0.45) 50%, transparent 51%),
+        radial-gradient(1px 1px at 58% 18%, rgba(231,238,249,0.55) 50%, transparent 51%),
+        radial-gradient(1px 1px at 74% 62%, rgba(231,238,249,0.4) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 90% 38%, rgba(231,238,249,0.5) 50%, transparent 51%);
+}
+.end-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px;
+    color: var(--cy); margin-bottom: 26px;
+}
+.end-big { font-size: 46px; font-weight: 700; line-height: 1.16; letter-spacing: -1px; margin-bottom: 26px; text-align: left; }
+.end-big .hl { color: var(--cy); }
+.end-text { font-size: 14px; color: var(--dim); max-width: 520px; margin-bottom: 38px; text-align: left; }
+.end-final {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px;
+    color: var(--dim); border-top: 1px solid var(--line2); padding-top: 18px;
+    display: flex; justify-content: space-between;
+}
+
+/* ============ CHALLENGE DOSSIER EXTENSIONS ============ */
+.ch-card {
+    break-inside: avoid;
+    border: 1px solid var(--line2);
+    background: var(--panel);
+    padding: 0; margin-bottom: 14px; box-sizing: border-box;
+}
+.ch-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; border-bottom: 1px solid var(--line2);
+    background: rgba(56,189,248,0.05);
+}
+.ch-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+    color: var(--cy); letter-spacing: 1px;
+}
+.ch-name { font-size: 13.5px; font-weight: 600; flex: 1 1 300px; min-width: 200px; text-align: left; }
+.ch-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.diff {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    padding: 2px 8px; border: 1px solid var(--line2); color: var(--dim);
+}
+.diff.adv { color: #F59E0B; border-color: rgba(245,158,11,0.4); }
+.diff.int { color: var(--cy); border-color: var(--line); }
+.diff.yth { color: #A5B4FC; border-color: rgba(165,180,252,0.4); }
+.ch-body { padding: 11px 16px 4px 16px; font-size: 12px; color: var(--dim); text-align: left; }
+.ch-body b { color: var(--ink); font-weight: 600; }
+.ch-body .hl-cy { color: var(--cy); font-weight: 600; }
+.dims { padding: 6px 16px 4px 16px; }
+.dim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; max-width: 100%; }
+.dim-row .dl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    color: var(--dim); width: 128px; flex-shrink: 0; text-align: left;
+}
+.dim-row .track { flex: 1 1 auto; height: 5px; background: rgba(140,160,190,0.15); position: relative; }
+.dim-row .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--cy); }
+.dim-row .dv {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    width: 30px; flex-shrink: 0; text-align: right;
+}
+.ch-verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    color: var(--dim); border-top: 1px dashed var(--line2);
+    padding: 8px 16px; margin-top: 8px; text-align: left;
+}
+.ch-verdict b { color: var(--cy); font-weight: 700; }
+.tier { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 700; letter-spacing: 2px; padding: 3px 10px; border: 1px solid var(--line); }
+.tier.s { color: #070B14; background: var(--cy); border-color: var(--cy); }
+.tier.a { color: var(--cy); background: rgba(56,189,248,0.08); }
+.tier.b { color: var(--dim); border-color: var(--line2); }
+.tier.c { color: #64748B; border-color: rgba(100,116,139,0.4); }
+.rank-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cy); }
+.wp { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body>
+<!-- ==================== PDF1 COVER ==================== -->
+<div class="cover">
+    <div class="stars"></div>
+    <div class="cover-topline">
+        <span><span class="dot">&#9650;</span> REV 2.0 MODIFIED MASTER PLAN // SOLO EDITION</span>
+        <span>DOC-ID: SP-2026-006</span>
+    </div>
+    <div class="cover-badge">NASA SPACE APPS 2026 &nbsp;&#9670;&nbsp; STRATEGIC UPDATE &mdash; SUPERSEDES REV 1 EXECUTION SECTIONS</div>
+    <h1 class="cover-title"><div>WIN</div><div class="hl">SOLO</div></h1>
+    <p class="cover-sub">The operating system for a one-person campaign: every AI available &mdash; but only in chat. No local models, no agents running overnight, no GPU. This document converts that constraint into an arsenal: chat-driven coding protocol, MCP tooling, GitHub Actions automation, and a 100&nbsp;percent API-driven build path to a global-award submission.</p>
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <div class="k">OPERATING FORCE</div>
+            <div class="v"><em>1</em> OPERATOR</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">LOCAL COMPUTE</div>
+            <div class="v"><em>0</em> GPU / 0 MODELS</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">BUILD PATH</div>
+            <div class="v"><em>100%</em> API + CI</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">EXECUTION WINDOW</div>
+            <div class="v"><em>48H</em> EVENT</div>
+        </div>
+    </div>
+    <div class="cover-bottomline">
+        <span>PREPARED BY: MISSION COMMAND</span>
+        <span>REV 2.0 // AI-NATIVE DOCTRINE</span>
+    </div>
+</div>
+
+<div class="main-content">
+
+<!-- ============ BRIEFING ============ -->
+<div class="chapter-header first">
+    <div class="sec-tag">TRANSMISSION 006 // STRATEGIC UPDATE</div>
+    <div class="sec-title">What Changed, What Survives</div>
+    <p class="sec-lede">The mission is unchanged. The way of working is rebuilt from the keel up.</p>
+</div>
+
+<p class="body-text">REV 1 of this campaign assumed a team of two to four builders with a pre-built Next.js chassis, a registry of locally-served Hugging Face models, and FastAPI micro-services gluing the stack together. The operating reality is now different and sharper: <b>one operator, with frontier AI assistants available only as chat</b> &mdash; ChatGPT, Astra, Gemini, Claude &mdash; and nothing resident on the machine. There is no local model serving, no long-lived agent, no GPU, and no background daemon. Everything that must run, must run somewhere else: inside GitHub Actions, on a hosting platform&rsquo;s edge, or behind a public API that returns an answer in a single request.</p>
+
+<p class="body-text">This constraint sounds like a downgrade. It is not. It is a <b>forcing function toward the strongest possible build style</b>: deterministic science computed in continuous integration, data products frozen as static JSON, a front-end that is pure static hosting, alerts delivered by bots instead of back-ends, and every creative inference done either at build time or through a free-tier hosted API. The result is an app that cannot crash in the demo because there is almost nothing left to crash &mdash; and an operator whose only job during the 48 hours is to direct chat assistants, accept their work at acceptance gates, and commit. This document defines that way of working; its companion, SP-2026-007, converts it into a portion-by-portion build bible for PYROCHRON, the flagship challenge.</p>
+
+<div class="callout">
+    <div class="co-tag">DOC MAP // HOW REV 2 RELATES TO THE SUITE</div>
+    SP-2026-001 (Mission Playbook) and SP-2026-002 (Challenge Dossier) remain fully valid as strategy and analysis. SP-2026-003/004/005 (PYROCHRON, PULSE, ROOTLOGIC master plans) remain valid for <b>science, product, and pitch doctrine</b> &mdash; but their execution sections (team choreography, local HF models, FastAPI services) are <b>superseded by this document and SP-2026-007</b>. Where the two generations disagree, REV 2 wins.
+</div>
+
+<!-- ============ S1 CONSTRAINT MODEL ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 01 // THE CHAT-ONLY CONSTRAINT MODEL</div>
+    <div class="sec-title">One Human, Many Minds, One Interface</div>
+    <p class="sec-lede">Define the constraint precisely, then exploit it precisely.</p>
+</div>
+
+<p class="body-text">The tooling reality has three hard edges. First, <b>AI is conversational</b>: the assistants are brilliant at writing, reviewing, and debugging code, but they do not persist between sessions, cannot hold the build running, and cannot watch the world. Second, <b>there is no local heavy compute</b>: no GPU inference, no SAR processing farm, no model fine-tuning, nothing that would take longer than a laptop tolerates. Third, <b>the operator is a single thread of attention</b>: unlike a four-person team, one human cannot simultaneously debug an ingestion script, style a component, and write a pitch. Every REV 2 decision follows from trading against these three edges &mdash; and the trade is always the same: move work to machines that never sleep (CI schedulers, static CDNs, hosted APIs), and reserve the human for judgment, sequencing, and taste.</p>
+
+<p class="body-text">The model also has a generous upside the old plan never used: <b>frontier chat assistants are outstanding at exactly the work this build needs</b>. FIRMS CSV ingestion, climatology statistics, React components, GitHub Actions YAML &mdash; this is well-trodden, heavily-documented territory where chat-generated code is near-expert quality on the first or second iteration. The tasks that killed REV 1&rsquo;s most ambitious alternates &mdash; SAR interferometry, asteroid difference imaging, on-device vision models &mdash; are precisely the tasks that get harder under this constraint, which is why the re-selection verdict in Section 02 reshuffles the bench. The constraint does not just change how we build; it sharpens <b>what</b> we should build.</p>
+
+<div class="sub-title"><span class="num">01.1</span> Structural Consequences &mdash; The Three Moves</div>
+<table>
+    <colgroup><col style="width:24%"><col style="width:38%"><col style="width:38%"></colgroup>
+    <thead><tr><th>CONSEQUENCE</th><th>WHAT IT MEANS</th><th>HOW REV 2 ANSWERS IT</th></tr></thead>
+    <tbody>
+        <tr><td><b>Compute leaves the laptop</b></td><td>Any job longer than minutes must run in GitHub Actions on a schedule or trigger, not in a terminal session</td><td>Ingestion, harmonization, and product-building are CI workflows with retries and artifact uploads; the laptop only runs a browser and a chat tab</td></tr>
+        <tr><td><b>Models become APIs or arithmetic</b></td><td>No hosted weights of our own; inference must be a one-shot HTTP call on a free tier, or skipped entirely</td><td>Forecasting and anomaly detection are deterministic statistics written in Python; optional hosted calls (HF Inference Providers) decorate but never sit in the critical path</td></tr>
+        <tr><td><b>The operator becomes an orchestrator</b></td><td>One person cannot do parallel work, but can run parallel <span class="mono">chat sessions</span> against one shared repository</td><td>Three standing chat windows (DATA / FRONTEND / QA) with git commits as the shared memory; Section 03 defines the protocol</td></tr>
+    </tbody>
+</table>
+
+<div class="sub-title"><span class="num">01.2</span> What We Lose vs. What We Gain</div>
+<div class="grid-2">
+    <div class="card">
+        <div class="card-tag">LOST // PAID IN COMPLEXITY</div>
+        <div class="card-title">The Team Parallelism Tax</div>
+        <div class="card-body">No second pair of hands means the 48-hour plan trades feature breadth for <b>sequencing discipline</b>: portions are strictly ordered so that a demoable product exists from Hour&nbsp;24 onward. Local model serving disappears, so the AI showcase moves from &ldquo;our deployed model&rdquo; to <b>&ldquo;our method, computed honestly&rdquo;</b> &mdash; which judges score just as well when documented transparently. FastAPI services are gone; anything dynamic is one stateless serverless function, or nothing.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">GAINED // BANKED AS ROBUSTNESS</div>
+        <div class="card-title">The Static Product Dividend</div>
+        <div class="card-body">A build that is 95&nbsp;percent static files cannot fail at the podium: no cold starts, no database timeouts, no certificate drama. CI re-runs are free, so <b>data can be rebuilt hourly on event weekend</b> and every run is reproducible &mdash; a judge can replay the pipeline from the public repo. And because the whole stack is API-shaped, the same engine serves PULSE or ROOTLOGIC with a skin change, keeping the pivot option alive at near-zero cost.</div>
+    </div>
+</div>
+
+<div class="callout">
+    <div class="co-tag">DOCTRINE LINE</div>
+    If a feature requires something that runs continuously, learns overnight, or needs a GPU &mdash; it is redesigned into a build-time artifact or cut. The demo must work with the network cable pulled: cached data, static pages, zero live dependencies beyond the basemap tiles.
+</div>
+<!-- ============ S2 RE-SELECTION ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 02 // RE-SELECTION UNDER THE NEW CONSTRAINTS</div>
+    <div class="sec-title">The AI-Native Re-Score: 14 Briefs, One Survivor</div>
+    <p class="sec-lede">Same five dimensions, same weights as the dossier &mdash; plus one new adjustment: the AI-Native Solo Adjustment (ANSA).</p>
+</div>
+
+<p class="body-text">The dossier scored all fourteen challenges on Data Availability (0.30), Demo Wow (0.25), AI Leverage (0.20), Story Power (0.15), and Competition Density (0.10). REV 2 does not retouch those numbers; it applies a single <b>AI-Native Solo Adjustment</b> between &minus;1.1 and +0.5 that encodes what the constraint change does to each brief&rsquo;s win probability. Three factors drive the adjustment: <b>API-first data access</b> (can every input arrive over HTTP without bulk local downloads?), <b>CI-compatibility</b> (can all processing run as scheduled Python with no GPU and no interactive tools?), and <b>chat-AI buildability</b> (is the code in territory where chat assistants are near-expert?). Briefs that needed local model serving or heavy interactive processing take the largest cuts; briefs that were already pure-API deterministic builds gain.</p>
+
+<div class="sub-title"><span class="num">02.1</span> The REV 2 Matrix &mdash; All Fourteen, Re-ordered</div>
+<table>
+    <colgroup><col style="width:8%"><col style="width:7%"><col style="width:33%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:22%"></colgroup>
+    <thead><tr><th>RANK</th><th>#</th><th>CHALLENGE</th><th>REV 1</th><th>ANSA</th><th>REV 2</th><th>WHY THE MOVE</th></tr></thead>
+    <tbody>
+        <tr><td class="rank-cell">1</td><td class="mono">09</td><td>Harmonization of MODIS &amp; VIIRS &rarr; PYROCHRON</td><td class="mono">8.30</td><td class="mono">+0.50</td><td class="wp">8.80</td><td>100% API data (FIRMS), all science is CI-run Python, zero GPU &mdash; the constraint was built for this brief</td></tr>
+        <tr><td class="rank-cell">2</td><td class="mono">02</td><td>Earth System Trend Detective &rarr; PULSE</td><td class="mono">7.40</td><td class="mono">+0.30</td><td class="wp">7.70</td><td>GIBS/CMR series + MK/Sen statistics are pure code; small solo tax for variable-breadth wrangling</td></tr>
+        <tr><td class="rank-cell">3</td><td class="mono">07</td><td>Field Shift: Adapting Farms &rarr; ROOTLOGIC</td><td class="mono">7.25</td><td class="mono">+0.30</td><td class="wp">7.55</td><td>POWER/SMAP/GPM/SoilGrids all REST; explainable rule engine is chat-AI friendly; quota-free data de-risks the weekend</td></tr>
+        <tr><td class="rank-cell">4</td><td class="mono">04</td><td>CLPS Lunar Mission Browser</td><td class="mono">7.10</td><td class="mono">+0.40</td><td class="wp">7.50</td><td>Skyfield + Horizons ephemeris in CI is deterministic; chat assistants write orbital math well; open field survives solo scope</td></tr>
+        <tr><td class="rank-cell">5</td><td class="mono">10</td><td>Earth Analogs for Moon &amp; Mars</td><td class="mono">7.10</td><td class="mono">+0.20</td><td class="wp">7.30</td><td>API-heavy EO plus criteria engine fits; solo cost is the scientific validation pass nobody else will do</td></tr>
+        <tr><td class="rank-cell">6</td><td class="mono">11</td><td>Interplanetary Survival Guide: Martian Map</td><td class="mono">6.85</td><td class="mono">+0.35</td><td class="wp">7.20</td><td>Tile APIs + MapLibre is the easiest possible solo stack; capped by heavy competition in Mars-map territory</td></tr>
+        <tr><td class="rank-cell">7</td><td class="mono">08</td><td>Flame in Freefall</td><td class="mono">7.10</td><td class="mono">&minus;0.10</td><td class="wp">7.00</td><td>Still the most AI-native brief, but PSI dataset wrangling is a one-person bottleneck; RAG must run on thin free tiers</td></tr>
+        <tr><td class="rank-cell">8</td><td class="mono">14</td><td>The Earth Information Jukebox</td><td class="mono">6.65</td><td class="mono">+0.25</td><td class="wp">6.90</td><td>Web Audio + GIBS pixel sampling is CI-friendly and demo-unforgettable; sonification rigor needs care</td></tr>
+        <tr><td class="rank-cell">9</td><td class="mono">01</td><td>Abandoned but not Forgotten</td><td class="mono">6.60</td><td class="mono">+0.30</td><td class="wp">6.90</td><td>Perfectly solo-buildable static storytelling; capped by soft data product and crowded youth appeal</td></tr>
+        <tr><td class="rank-cell">10</td><td class="mono">03</td><td>Junior Astronaut Mission Trainer</td><td class="mono">6.55</td><td class="mono">&minus;0.15</td><td class="wp">6.40</td><td>Game polish is the one thing one operator cannot parallelize in 48h</td></tr>
+        <tr><td class="rank-cell">11</td><td class="mono">06</td><td>Dancing with the SARs (NISAR)</td><td class="mono">7.30</td><td class="mono">&minus;1.10</td><td class="wp">6.20</td><td>Biggest fall: SAR/InSAR processing volume and GPU habits die without local compute; HyP3 helps but cannot save the weekend</td></tr>
+        <tr><td class="rank-cell">12</td><td class="mono">12</td><td>Planet X and SPHEREx</td><td class="mono">6.40</td><td class="mono">&minus;0.50</td><td class="wp">5.90</td><td>Moving-object detection pipelines need compute and astronomy depth; viewer-only fallback shrinks the impact</td></tr>
+        <tr><td class="rank-cell">13</td><td class="mono">13</td><td>Space Mission Design Game</td><td class="mono">5.95</td><td class="mono">&minus;0.15</td><td class="wp">5.80</td><td>Same game-polish tax as #03, with heavier simulation physics</td></tr>
+        <tr><td class="rank-cell">14</td><td class="mono">05</td><td>Create Health Monitoring Software</td><td class="mono">5.50</td><td class="mono">+0.10</td><td class="wp">5.60</td><td>Slightly easier to fake depth solo, but data is not API-first and clinical claims are judge landmines</td></tr>
+    </tbody>
+</table>
+<div class="tbl-note">REV 1 base scores from SP-2026-002 dossier. ANSA = AI-Native Solo Adjustment, bounded [&minus;1.1, +0.5]. REV 2 = REV 1 + ANSA.</div>
+
+<div class="sub-title"><span class="num">02.2</span> The Verdict, Re-Confirmed and Strengthened</div>
+<p class="body-text">The headline of the re-score is that <b>the constraint change widens the flagship&rsquo;s lead</b>. PYROCHRON was already rank 1 at 8.30 under team assumptions; under solo-plus-chat it stretches to 8.80 because every one of its inputs arrives as a plain HTTP request, every one of its computations is a scheduled Python script, and none of its science requires a GPU or a served model. The distance to the field is no longer a matter of taste &mdash; it is structural. The fire record is the rare NASA dataset where the archive, the API, the documentation, and the update cadence are all simultaneously excellent, and the harmonization task rewards exactly the kind of patient, deterministic code that chat assistants generate reliably.</p>
+
+<p class="body-text">The bench reshuffles in the same direction. PULSE (#02) and ROOTLOGIC (#07) hold their pivot and alternate roles with improved scores &mdash; both are API-fed and statistics-first, and either can be executed by the same engine with a new skin. The CLPS browser (#04) is <b>promoted to active reserve</b>: its ephemeris math is fully deterministic, its competition is thin, and its data needs are the smallest on the slate. Dancing with the SARs (#06) drops from third to eleventh &mdash; not because NISAR is a bad mission but because a solo operator without local compute cannot bet the weekend on interferometric processing. SPHEREx (#12) likewise slides. The cold bench is now #08 and #14, kept for their AI-native and creative lanes respectively.</p>
+
+<div class="callout">
+    <div class="co-tag">DECISION // REV 2 PORTFOLIO</div>
+    <b>FLAGSHIP (commit at Hour 2):</b> #09 PYROCHRON &mdash; lead widens to a full point over the field. &nbsp;&bull;&nbsp; <b>PIVOT:</b> #02 PULSE (same engine, ~70% reuse). &nbsp;&bull;&nbsp; <b>ALTERNATE:</b> #07 ROOTLOGIC (quota-free data = safest weekend). &nbsp;&bull;&nbsp; <b>ACTIVE RESERVE:</b> #04 CLPS browser. &nbsp;&bull;&nbsp; <b>COLD RESERVE:</b> #08, #14. Swap rights expire at Hour 2 of the event, as before.
+</div>
+<!-- ============ S3 AI-NATIVE OS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 03 // THE AI-NATIVE OPERATING SYSTEM</div>
+    <div class="sec-title">Three Layers: Chat Protocol, MCP, Automation</div>
+    <p class="sec-lede">The substitute for a team, a toolchain, and a server room &mdash; in that order.</p>
+</div>
+
+<div class="arch">
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER A // HUMAN-CHAT CODING PROTOCOL</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">DATA SESSION</div><div class="d">ingest, harmonize, products &mdash; Python + CI</div></div>
+            <div class="arch-node"><div class="n">FRONTEND SESSION</div><div class="d">Next.js, MapLibre, calendar UI</div></div>
+            <div class="arch-node"><div class="n">QA SESSION</div><div class="d">Playwright checks, docs, pitch copy</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; commits &amp; issues as shared memory</span><span>&#9660;&nbsp; tasks via MCP / CLI</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER B // MCP TOOLBRIDGE</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">GITHUB MCP</div><div class="d">repos, issues, PRs, Actions toolsets</div></div>
+            <div class="arch-node"><div class="n">PLAYWRIGHT MCP</div><div class="d">a11y snapshots, screenshots, flows</div></div>
+            <div class="arch-node"><div class="n">FETCH MCP</div><div class="d">endpoint probing, API contract checks</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; triggers workflows</span><span>&#9660;&nbsp; deploys static products</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER C // CLOUD EXECUTION &mdash; WHERE WORK ACTUALLY RUNS</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">GITHUB ACTIONS</div><div class="d">cron ingest &rarr; harmonize &rarr; products &rarr; deploy</div></div>
+            <div class="arch-node"><div class="n">VERCEL / NETLIFY</div><div class="d">static hosting, preview URLs, 1 proxy fn</div></div>
+            <div class="arch-node"><div class="n">NASA APIS + TELEGRAM + RESEND</div><div class="d">FIRMS, GIBS, AppEEARS, POWER, EONET; alerts out</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="sub-title"><span class="num">03.1</span> Layer A &mdash; The Chat-Only Coding Protocol</div>
+<p class="body-text">Chat assistants have no memory of the repo, so the protocol manufactures memory out of <b>small context and hard artifacts</b>. Work is decomposed into <b>task cards</b>: a single file or single function with a stated input, output, and acceptance test, small enough that its entire context fits in one message. Each prompt carries three things &mdash; the relevant file (pasted, not described), the exact acceptance command, and the constraint list (fonts, library versions, style rules). The assistant returns code; the operator runs the acceptance command locally or pushes to CI; failures go back to the same chat with the verbatim error text pasted. One loop per task card, then commit with a conventional message. The commit history is the project&rsquo;s real memory: any fresh chat can be onboarded in thirty seconds with <span class="mono">git log --oneline</span> plus the file in question.</p>
+
+<p class="body-text">Because the operator can hold several chat tabs open, the solo build runs as <b>three standing sessions with strict jurisdictions</b>. The DATA session owns everything under <span class="mono">scripts/</span> and <span class="mono">.github/workflows/</span>; the FRONTEND session owns the app directory; the QA session owns issues, docs, and the submission kit. Sessions never edit each other&rsquo;s files &mdash; cross-cutting requests are filed as GitHub issues (via the GitHub MCP or plain web) and picked up by the owning session. This recreates the old team&rsquo;s code-review benefit at zero personnel cost: before any merge, the operator asks a second, different assistant to <b>review the diff</b> in its own window; reviewers catch hallucinated API parameters more often than any linter. That two-assistant pattern &mdash; one writes, one critiques &mdash; is the single highest-value habit in this document.</p>
+
+<div class="check">
+    <div class="check-item"><span class="bx"></span><span><b>Task card rule.</b> One file or one function per prompt; input, output, and acceptance command stated up front. If the card needs two paragraphs of context, split the card.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Error-paste rule.</b> Never paraphrase an error. Paste the verbatim stack trace plus the line of code that produced it; assistants fix real errors faster than descriptions.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Reviewer rule.</b> Every non-trivial diff gets a critique pass in a different assistant&rsquo;s window before merge. Author-assistant and reviewer-assistant must not be the same model.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Commit rule.</b> Commit after every green acceptance test, message format <span class="mono">P{n}: {what} &mdash; {proof}</span>. The log doubles as the methodology page for judges.</span></div>
+</div>
+
+<div class="sub-title"><span class="num">03.2</span> Layer B &mdash; The MCP Toolbridge</div>
+<p class="body-text">Model Context Protocol servers are what turn a chat window into an operator console, and three of them cover the entire build. The <b>GitHub MCP server</b> (official, remote) exposes toolsets for Repos, Issues, Pull Requests, Actions, and Discussions &mdash; which means the operator can create the repo, file task cards as issues, push branches, open PRs, and read workflow logs without leaving the chat that is writing the code. The <b>Playwright MCP server</b> gives the QA session eyes: it navigates the deployed preview, captures structured accessibility snapshots, and takes screenshots on demand &mdash; that is how a solo operator runs a visual regression pass and proves console-clean rendering at 2 a.m. The <b>fetch MCP</b> probes data endpoints directly from chat &mdash; paste a FIRMS URL, get the first rows back, confirm the schema before writing a line of ingestion code.</p>
+
+<p class="body-text">The bridge also has a <b>fallback mode</b>, because hackathon Wi-Fi and tool outages are part of the game. If MCP is unavailable, every action it enables has a CLI equivalent the assistant can generate verbatim: <span class="mono">gh</span> commands for repo and workflow operations, <span class="mono">curl</span> for endpoint probes, and a fifteen-line Playwright script for screenshots. The protocol is identical &mdash; only the transport changes &mdash; and the bible in SP-2026-007 writes the fallback commands next to every MCP step so no decision ever waits on a tool.</p>
+
+<div class="callout">
+    <div class="co-tag">WHY MCP MATTERS SOLO</div>
+    A team loses one member&rsquo;s hour to tool friction and absorbs it. A solo operator loses the same hour with no one to absorb it. MCP exists in this doctrine to keep the operator&rsquo;s hands on judgment &mdash; the round trip from &ldquo;idea&rdquo; to &ldquo;merged and deployed&rdquo; must stay under ten minutes all weekend.
+</div>
+
+<div class="sub-title"><span class="num">03.3</span> Layer C &mdash; Automation and the $0 Cloud</div>
+<p class="body-text">Everything that must run, runs in GitHub Actions &mdash; free on a public repository, which the build adopts deliberately (see Section 05 for the secrets hygiene that makes a public repo safe). Three workflows carry the entire operation: <b>ingest</b> (scheduled, pulls FIRMS NRT every six hours and appends to the archive), <b>build-products</b> (recomputes harmonized JSON products on every ingest and commits them), and <b>deploy</b> (static export to Vercel or Netlify on every commit to main, with preview URLs per branch). Alerts ride out through the <b>Telegram Bot API</b> and <b>Resend</b> free tier &mdash; a daily fire digest and threshold alarms, both initiated by Actions, both needing zero infrastructure. Optional hosted inference, if any feature wants it, rides the Hugging Face Inference Providers free tier (a few hundred requests per hour, models under roughly 10B parameters) &mdash; useful for a demo flourish, forbidden in the critical path.</p>
+
+<p class="body-text">The total infrastructure bill is <b>zero dollars</b>, and more importantly the operational surface is a handful of YAML files the operator can read in one sitting. Every moving part is observable in a public place: workflow runs are browsable, artifacts are downloadable, and a judge who wants to check honesty can replay the whole pipeline from the repository. This transparency is not a consolation prize for lacking a back-end &mdash; it is the Best-Use-of-Data pitch itself.</p>
+<!-- ============ S4 MODEL STRATEGY ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 04 // MODEL STRATEGY REV 2</div>
+    <div class="sec-title">From Model Registry to Method Registry</div>
+    <p class="sec-lede">Every REV 1 model task gets a deterministic substitute or a hosted one-shot &mdash; nothing in the critical path needs weights we own.</p>
+</div>
+
+<p class="body-text">REV 1&rsquo;s AI division assumed a local Hugging Face registry: Chronos-Bolt for forecast, Prithvi-EO for downstream Earth observation, an embedding model for retrieval, an LLM service for briefing generation. Under the chat-only constraint that entire registry is retired &mdash; and the honest engineering answer is that the flagship never needed it. The scientific work judges reward in the fire brief is <b>calibration and climatology arithmetic</b>: z-scores against a 20-year baseline, seasonal decomposition, a transfer function between two sensors. That is a hundred lines of NumPy, fully reproducible in CI, and more defensible in front of a judge than a black-box forecast. Models return only where they add demonstrable value at zero operational risk: build-time narrative generation and an optional hosted forecast flourish.</p>
+
+<div class="sub-title"><span class="num">04.1</span> The Replacement Matrix</div>
+<table>
+    <colgroup><col style="width:26%"><col style="width:20%"><col style="width:34%"><col style="width:20%"></colgroup>
+    <thead><tr><th>REV 1 PLAN (LOCAL)</th><th>REV 2 SUBSTITUTE</th><th>HOW IT WORKS</th><th>RUNTIME RISK</th></tr></thead>
+    <tbody>
+        <tr><td>Chronos-Bolt forecast microservice</td><td><b>Climatology z-score + STL</b> in Python (CI)</td><td>Season-trend decomposition per AOI week-of-year; 4-week outlook as climatology-plus-trend projection</td><td>None &mdash; pure code, runs in Actions</td></tr>
+        <tr><td>Prithvi-EO downstream tasks</td><td><b>Dropped</b> &mdash; not needed</td><td>FIRMS points + MCD64A1 burned area cover the brief; no imagery classification required</td><td>None</td></tr>
+        <tr><td>LLM briefing generator service</td><td><b>Build-time narratives, cached</b></td><td>Chat assistants write per-AOI fire-season reports during the build; shipped as static JSON &mdash; zero runtime cost, zero hallucination risk at demo</td><td>None</td></tr>
+        <tr><td>Embeddings + local RAG</td><td><b>HF Inference Providers free tier</b> (optional)</td><td>A few hundred requests/hour on &lt;10B models; reserved for the #08 reserve brief&rsquo;s Q&amp;A demo if activated</td><td>Low &mdash; decorative only</td></tr>
+        <tr><td>FastAPI micro-services</td><td><b>1 stateless serverless proxy</b></td><td>Single function for live NRT passthrough with caching; everything else static</td><td>Low &mdash; one function</td></tr>
+        <tr><td>Chronos demo flourish (stretch)</td><td><b>Hosted Chronos via HF serverless</b></td><td>If free-tier quota allows on demo day, a live &ldquo;next 4 weeks&rdquo; call; UI degrades gracefully to climatology view when quota is dry</td><td>Low &mdash; has fallback</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">IRON RULES // MODELS UNDER CHAT-ONLY CONSTRAINTS</div>
+    <b>Rule 1:</b> No model in the critical path &mdash; if a hosted call fails, every screen still renders. <b>Rule 2:</b> Every &ldquo;AI feature&rdquo; ships with its deterministic twin visible in the UI (the judge sees the honest method by default). <b>Rule 3:</b> All build-time generation happens in the operator&rsquo;s chat windows before the event, never live at the podium.
+</div>
+
+<!-- ============ S5 INFRASTRUCTURE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 05 // INFRASTRUCTURE DECISIONS</div>
+    <div class="sec-title">Public Repo, Static Products, Zero Dollars</div>
+    <p class="sec-lede">Five decisions made now so that no hour of the event is spent making them.</p>
+</div>
+
+<p class="body-text"><b>Decision 1 &mdash; the repository is public.</b> Scheduled GitHub Actions workflows do not run on private repositories under the free plan, and the entire automation layer depends on cron; a public repo also gives judges the replayable-pipeline transparency described above. The cost is secret hygiene: MAP_KEY, Telegram token, and Resend key live only in <b>encrypted Actions secrets</b>, never in client code, never in logs, and the NRT proxy reads its key server-side so the browser never sees one. <b>Decision 2 &mdash; scheduling belongs to Actions, not the host.</b> Hosting-platform cron on free tiers is limited and opaque; the build uses Actions for every schedule and a deploy hook for publication, so the pipeline and the schedule live in the same reviewable YAML.</p>
+
+<p class="body-text"><b>Decision 3 &mdash; data products are static JSON committed to the repo.</b> Each product file stays under 5 MB and the full set under 40 MB, which keeps git fast, deploys instant, and the app entirely CDN-served; size budgets are enforced by the build script so no portion can silently bloat the repo. <b>Decision 4 &mdash; the front-end is a static export</b> (Next.js static export or Vite) with exactly one serverless function for live NRT passthrough &mdash; deployable to Vercel or Netlify hobby plans with preview URLs per branch, which is what the Playwright QA loop tests against. <b>Decision 5 &mdash; every external call has a static fallback:</b> basemap tiles from GIBS fail gracefully to a plain dark style, the live proxy fails to the last committed product, and the demo script never depends on a fresh API response. The cumulative result is a submission whose failure surface is close to zero and whose running cost is exactly zero.</p>
+
+<div class="stat-row">
+    <div class="stat"><div class="v">$0</div><div class="k">TOTAL INFRA COST / MONTH</div></div>
+    <div class="stat"><div class="v">1</div><div class="k">SERVERLESS FUNCTION, TOTAL</div></div>
+    <div class="stat"><div class="v">3</div><div class="k">GITHUB ACTIONS WORKFLOWS</div></div>
+    <div class="stat"><div class="v">&le;40MB</div><div class="k">ALL DATA PRODUCTS, COMMITTED</div></div>
+</div>
+<!-- ============ S6 SOLO RHYTHM ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 06 // THE SOLO OPERATING RHYTHM</div>
+    <div class="sec-title">Managing One Body, Three Chats, Forty-Eight Hours</div>
+    <p class="sec-lede">Solo execution fails by energy collapse before it fails by engineering. The rhythm is the plan.</p>
+</div>
+
+<p class="body-text">A four-person team survives 48 hours by rotating exhaustion; a solo operator survives by <b>banking sleep in advance and defending two hard blocks</b> &mdash; roughly six hours in each night, non-negotiable, because hour 36 of uninterrupted work produces negative output. Between blocks, the operator works in 90-minute focus cycles against one session at a time, with the other two chats parked on long-running requests (a component build, a workflow run, a QA sweep) whose results are waiting at pickup. The <b>commit cadence is the metronome</b>: no 90-minute cycle ends without a green acceptance test and a push, so CI is always proving the last claim. If a cycle ends red, the rule is to revert to the last green commit and re-ask with a tighter prompt &mdash; never to debug past the second failed iteration in the same window.</p>
+
+<p class="body-text">Decision-making adapts to the missing team vote through <b>hard default rules</b> written now, while calm. Challenge commitment happens at the Hour 2 data check and only if a data check fails does the default order advance (PYROCHRON &rarr; PULSE &rarr; ROOTLOGIC); no swap is legal after Hour 2 under any circumstance. Scope disputes between the operator&rsquo;s enthusiasm and the plan are settled by the plan &mdash; the bible&rsquo;s portion list is the scope, and new ideas go into a <span class="mono">parking-lot.md</span> file rather than the build. The only metric that matters at every gate is: <b>could a judge demo this in 90 seconds right now?</b> Portion ordering guarantees the answer is yes from Hour 24 onward, which is what makes the final polish cycles calm instead of desperate.</p>
+
+<div class="sub-title"><span class="num">06.1</span> Decision Gates, Solo Edition</div>
+<table>
+    <colgroup><col style="width:16%"><col style="width:38%"><col style="width:46%"></colgroup>
+    <thead><tr><th>GATE</th><th>QUESTION</th><th>HARD DEFAULT (NO VOTE NEEDED)</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">HOUR 0&ndash;1</td><td>Do the live briefs match the dossier assumptions?</td><td>Yes &rarr; proceed. No &rarr; re-score only the changed card using Section 02 table, apply same ANSA logic</td></tr>
+        <tr><td class="mono">HOUR 1&ndash;2</td><td>Do the three data checks pass (FIRMS archive+NRT, one NASA variable series, one agri endpoint)?</td><td>Pass &rarr; commit PYROCHRON. FIRMS degraded &rarr; PULSE. Both degraded &rarr; ROOTLOGIC (quota-free sources)</td></tr>
+        <tr><td class="mono">HOUR 2+</td><td>Any reason to abandon the committed bible?</td><td>None is legal. Deviations are logged in <span class="mono">deviations.md</span>; redesigns are forbidden</td></tr>
+        <tr><td class="mono">HOUR 24</td><td>Is the hero screen demoable from the deployed preview?</td><td>Must be yes by gate design; if not, freeze features, spend the next cycle only on the hero path</td></tr>
+        <tr><td class="mono">HOUR 42</td><td>Is the video script shot-listed and the project page drafted?</td><td>Must be yes; P9 begins regardless of feature state &mdash; submission beats completeness</td></tr>
+    </tbody>
+</table>
+
+<!-- ============ S7 CARRYOVER ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 07 // WHAT CARRIES OVER FROM REV 1</div>
+    <div class="sec-title">Asset Migration Table</div>
+    <p class="sec-lede">Nothing strategic is thrown away; everything operational is re-plumbed.</p>
+</div>
+
+<table>
+    <colgroup><col style="width:30%"><col style="width:16%"><col style="width:54%"></colgroup>
+    <thead><tr><th>REV 1 ASSET</th><th>STATUS</th><th>REV 2 DISPOSITION</th></tr></thead>
+    <tbody>
+        <tr><td>TERRA SENTINEL chassis (Next.js shell, geo-stack)</td><td class="mono">CARRIES</td><td>No longer pre-built by a team; instead <b>generated by the bible&rsquo;s Portion P4</b> from a battle-tested component tree the chat sessions can assemble in hours</td></tr>
+        <tr><td>FIRMS ingestion + harmonization science (SP-2026-003 &sect;03)</td><td class="mono">CARRIES</td><td>Fully valid; runs in CI instead of a local Python environment &mdash; spec restated in SP-2026-007 &sect;03</td></tr>
+        <tr><td>PULSE science (MK/Sen/STL protocol)</td><td class="mono">CARRIES</td><td>Pivot brief remains one skin-change away; same engine, same CI, same product pattern</td></tr>
+        <tr><td>ROOTLOGIC connectors + rule engine</td><td class="mono">CARRIES</td><td>Alternate brief unchanged; all four data sources are REST and quota-free, ideal under solo constraints</td></tr>
+        <tr><td>Hugging Face model registry</td><td class="mono">RETIRED</td><td>Replaced by Section 04 replacement matrix &mdash; deterministic statistics in the path, hosted free tier for decoration</td></tr>
+        <tr><td>FastAPI micro-service layer</td><td class="mono">RETIRED</td><td>Replaced by CI products + one stateless proxy function</td></tr>
+        <tr><td>Pitch kit (30s + 2min scripts, storyboard)</td><td class="mono">CARRIES</td><td>Valid as doctrine; PYROCHRON-specific re-cut in SP-2026-007 &sect;P9 with the solo demo flow</td></tr>
+        <tr><td>48h battle plan (team phases)</td><td class="mono">SUPERSEDED</td><td>Replaced by the solo war schedule in SP-2026-007 &sect;S15 with sleep blocks and chat-window assignments</td></tr>
+    </tbody>
+</table>
+
+<div class="sub-title"><span class="num">07.1</span> The Pre-Event Week &mdash; Seven Days Out</div>
+<p class="body-text">The solo model shifts as much work as possible into the week before the event, and this document is explicit about which week-day carries which obligation. The table below is the seven-day countdown that makes the 48-hour schedule realistic: by the time the event opens, the operator should have already run every portion once in miniature, so the weekend is repetition under pressure rather than invention under pressure. A dry-run that exposes a broken step on Tuesday costs fifteen minutes; the same discovery at Hour 20 on Saturday costs the submission.</p>
+<table>
+    <colgroup><col style="width:16%"><col style="width:48%"><col style="width:36%"></colgroup>
+    <thead><tr><th>DAY</th><th>OBLIGATION</th><th>OUTPUT / PROOF</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">MON&ndash;TUE</td><td>Run P0 and P1 end to end on the real repo: keys, secrets, workflows, one archive AOI loaded, one NRT dispatch</td><td>Green CI runs; parquet artifacts committed</td></tr>
+        <tr><td class="mono">WED</td><td>Run P2 on one small AOI only &mdash; calibration, FAI, climatology, r-value &mdash; to prove the science path</td><td>k-table printed; r &ge; 0.6 on test AOI</td></tr>
+        <tr><td class="mono">THU</td><td>Run P4 scaffold against stub JSON; deploy the shell; book the preview URL into the pitch notes</td><td>Live preview with empty-state UI</td></tr>
+        <tr><td class="mono">FRI</td><td>Generate <span class="mono">reports.json</span> narratives for all 12 AOIs in the chat windows; QA-session translations; REST</td><td>reports.json committed; strings translated</td></tr>
+        <tr><td class="mono">SAT</td><td>Full dry run of the 90-second demo path on stub data; record a rehearsal take of the video narration</td><td>Rehearsal take saved; demo path timed</td></tr>
+        <tr><td class="mono">SUN</td><td>Rest. Charge everything. Print the war schedule and the portion contract; open the three chat windows fresh</td><td>Operator at 100% for H0</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">NEXT TRANSMISSION</div>
+    SP-2026-007 &mdash; the PYROCHRON Build Bible: ten portions from empty repository to deployed, judged, submitted product; every step API-driven, every acceptance test defined, every prompt recipe pre-written. This is the document that runs the weekend.
+</div>
+
+</div><!-- /main-content -->
+
+<!-- ==================== PDF1 ENDING ==================== -->
+<div class="ending">
+    <div class="stars"></div>
+    <div class="end-tag">END OF TRANSMISSION 006 // REV 2.0 DOCTRINE</div>
+    <div class="end-big"><div>ONE OPERATOR.</div><div>ONE ENGINE.</div><div class="hl">ZERO EXCUSES.</div></div>
+    <div class="end-text">The constraint was never a handicap &mdash; it was a filter. It kept the brief whose data arrives as HTTP, whose science is arithmetic, and whose demo cannot crash. Arm the three chat windows, read the bible, and run the portions. The calendar is waiting to be built.</div>
+    <div class="end-final">
+        <span>NEXT DOC: SP-2026-007 &#9670; PYROCHRON BUILD BIBLE</span>
+        <span>MISSION COMMAND OUT</span>
+    </div>
+</div>
+</body>
+</html>

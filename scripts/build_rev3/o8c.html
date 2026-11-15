@@ -1,0 +1,70 @@
+
+<!-- ============ S3 VAULT & DATA-FLOW ARCHITECTURE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 03 // VAULT &amp; DATA-FLOW ARCHITECTURE</div>
+    <div class="sec-title">Where Secrets Live, Where Data Flows</div>
+    <p class="sec-lede">One private source of truth, encrypted at the runtime layer, zero keys in anything a judge will ever see.</p>
+</div>
+
+<p class="body-text">The vault repository <span class="mono">Hisernberg/spaceapps-2026-vault</span> (private, created 2026-09-20, HTTP 201) is now the single canonical home for credentials and automation scripts. It contains secrets.env with all live values, placeholder-only secrets.env.example for public use, the three production pull scripts, the verification report with all recorded evidence, and the workflow definitions. Three Actions secrets were installed via the encrypted-seal API (all HTTP 201): FIRMS_MAP_KEY, NASA_API_KEY, and HF_TOKEN. A second private store exists at <span class="mono">huggingface.co/datasets/Nabidnur/spaceapps26-data</span> for files too large for git, readable by automation only. This two-store layout means a public project repository can run scheduled automation without ever containing a plaintext secret.</p>
+
+<div class="arch">
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER 1 // PRIVATE VAULT (SOURCE OF TRUTH)</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">secrets.env</div><div class="d">all live credentials, rotated Nov 16</div></div>
+            <div class="arch-node"><div class="n">scripts/</div><div class="d">firms_pull &middot; eonet_pull &middot; power_pull &middot; verify_all</div></div>
+            <div class="arch-node"><div class="n">report + docs</div><div class="d">verification evidence, SOP, topology</div></div>
+        </div>
+    </div>
+    <div class="arch-conn">&#9660; copy scripts + set encrypted Actions secrets &#9660;</div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER 2 // PUBLIC PROJECT REPO (RUNTIME AUTOMATION)</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">Actions cron</div><div class="d">daily 02:17 UTC FIRMS pull + harmonize</div></div>
+            <div class="arch-node"><div class="n">keyless pulls</div><div class="d">EONET &middot; POWER &middot; GIBS snapshots</div></div>
+            <div class="arch-node"><div class="n">data/ commits</div><div class="d">precomputed JSON frozen in git</div></div>
+        </div>
+    </div>
+    <div class="arch-conn">&#9660; static JSON via jsDelivr / GitHub Pages &#9660;</div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER 3 // APP + CDN (WHAT JUDGES SEE)</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">static front-end</div><div class="d">Astro + MapLibre + Chart.js, zero keys</div></div>
+            <div class="arch-node"><div class="n">browser statistics</div><div class="d">Mann-Kendall &middot; Sen &middot; z-scores in JS</div></div>
+            <div class="arch-node"><div class="n">graceful badges</div><div class="d">&ldquo;data as of&rdquo; + offline demo bundle</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="callout">
+    <div class="co-tag">WHY CRON LIVES IN THE PUBLIC REPO</div>
+    On the GitHub free plan, <b>scheduled workflows only run on public repositories</b> &mdash; a constraint already captured in REV 2 doctrine. The vault (private) therefore holds canonical scripts and secrets, while the public project repo holds the cron. The key exists there only as an encrypted Actions secret, set once with <span class="mono">gh secret set</span> or the seal-box API. Push-triggered workflows do run on private repos, which is why the vault&rsquo;s own verification workflow works today.
+</div>
+
+<!-- ============ S4 API GAP LIST ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 04 // THE GAP LIST</div>
+    <div class="sec-title">&ldquo;Any More APIs Needed?&rdquo; &mdash; The Definitive Answer</div>
+    <p class="sec-lede">The build can start today with what is already verified. Five free registrations upgrade optionality; nothing is blocking.</p>
+</div>
+
+<p class="body-text">For the finalized portfolio &mdash; PYROCHRON flagship, PULSE pivot, ROOTLOGIC alternate &mdash; the verified arsenal already covers every critical-path call: FIRMS for fire history and detection, GIBS for visual and thermal anomaly layers, EONET for event cross-links, POWER for climate series, api.nasa.gov for narrative feeds, CMR for discovery. Nothing else must be registered before coding begins. The items below are opportunistic upgrades: each takes minutes, costs nothing, and either deepens the science, hardens a fallback, or opens a demo capability. They are ordered by leverage.</p>
+
+<table>
+    <colgroup><col style="width:24%"><col style="width:30%"><col style="width:32%"><col style="width:14%"></colgroup>
+    <thead><tr><th>ITEM</th><th>WHAT IT UNLOCKS</th><th>EFFORT</th><th>PRIORITY</th></tr></thead>
+    <tbody>
+        <tr><td><b>ASF Vertex profile</b><br><span class="mono">search.asf.alaska.edu</span></td><td>Sentinel-1 + NISAR granule downloads under the existing Earthdata login &mdash; activates the #6 SAR pivot door</td><td>Profile activation + EULA accept, ~5 min</td><td><b>HIGH</b> (optionality)</td></tr>
+        <tr><td><b>LAADS DAAC approval</b></td><td>Official MODIS/VIIRS L2 archive if FIRMS science products ever need raw granule depth</td><td>Earthdata login + app approval, ~5 min</td><td><b>HIGH</b></td></tr>
+        <tr><td><b>Vercel or Netlify account</b></td><td>Second deploy target beyond GitHub Pages; preview channels per commit for fast demo QA</td><td>Sign-up, ~5 min</td><td><b>MEDIUM</b></td></tr>
+        <tr><td><b>USGS + Open-Meteo</b></td><td>Keyless already &mdash; no account; bookmark endpoints for quake cross-links and fire-weather context in PYROCHRON Alert Lab</td><td>0 min</td><td><b>USE AS-IS</b></td></tr>
+        <tr><td><b>Copernicus Data Space</b></td><td>ESA-side Sentinel backup if ASF throttles during event weekend</td><td>Registration, ~10 min</td><td>LOW (backup)</td></tr>
+        <tr><td><b>n8n (self-host or cloud free)</b></td><td>Visual automation alternative to Actions if a non-cron trigger pattern is ever needed</td><td>~30 min if wanted</td><td>OPTIONAL</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">EXPLICIT NON-GAPS // THINGS WE DELIBERATELY DO NOT NEED</div>
+    No Mapbox or Google Maps keys (MapLibre + GIBS basemaps are free and attribution-correct). No paid LLM API keys (runtime intelligence is deterministic statistics plus optional browser-side transformers.js &mdash; runs in the judge&rsquo;s browser, not on our bill). No Supabase or database service (git-committed JSON is the database). No Docker registry (Actions run Python directly). The zero-dollar constraint is holding with no exceptions.
+</div>

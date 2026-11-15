@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WIN SOLO / PYROCHRON BUILD BIBLE — REV 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ MISSION CONTROL DARK DESIGN SYSTEM ============ */
+@page {
+    size: 720px 1020px;
+    margin: 0;
+}
+:root {
+    --bg: #070B14;
+    --panel: #0E1626;
+    --panel2: #101B30;
+    --ink: #E7EEF9;
+    --dim: #8CA0BE;
+    --cy: #38BDF8;
+    --line: rgba(56, 189, 248, 0.18);
+    --line2: rgba(140, 160, 190, 0.14);
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 720px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.66;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+body {
+    line-break: strict;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+p, td, li {
+    line-break: strict;
+    text-align: justify;
+}
+@media screen {
+    html {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        background: #03060C;
+    }
+    body {
+        margin: 24px auto;
+        box-shadow: 0 0 60px rgba(56,189,248,0.12);
+    }
+}
+.mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+/* ============ COVER ============ */
+.cover {
+    width: 720px;
+    height: 1020px;
+    box-sizing: border-box;
+    break-after: page;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 60px;
+    background:
+        radial-gradient(circle at 612px 82px, transparent 276px, rgba(56,189,248,0.16) 277px 279px, transparent 280px),
+        radial-gradient(circle at 630px 172px, transparent 186px, rgba(56,189,248,0.10) 187px 189px, transparent 190px),
+        radial-gradient(circle at 42px 952px, transparent 146px, rgba(56,189,248,0.14) 147px 149px, transparent 150px),
+        radial-gradient(circle at 512px 143px, rgba(56,189,248,0.55) 0 6px, transparent 9px),
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(56,189,248,0.14), transparent 60%),
+        radial-gradient(ellipse 70% 45% at 85% 108%, rgba(56,189,248,0.10), transparent 60%),
+        var(--bg);
+}
+.cover .stars {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 12% 22%, rgba(231,238,249,0.7) 50%, transparent 51%),
+        radial-gradient(1px 1px at 28% 68%, rgba(231,238,249,0.45) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 44% 12%, rgba(231,238,249,0.6) 50%, transparent 51%),
+        radial-gradient(1px 1px at 62% 82%, rgba(231,238,249,0.4) 50%, transparent 51%),
+        radial-gradient(1px 1px at 76% 34%, rgba(231,238,249,0.65) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 88% 58%, rgba(231,238,249,0.5) 50%, transparent 51%),
+        radial-gradient(1px 1px at 8% 78%, rgba(231,238,249,0.5) 50%, transparent 51%),
+        radial-gradient(1px 1px at 55% 45%, rgba(231,238,249,0.35) 50%, transparent 51%);
+}
+.cover-topline {
+    position: absolute; top: 42px; left: 60px; right: 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim);
+}
+.cover-topline .dot { color: var(--cy); }
+.cover-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 3px;
+    color: var(--cy); border: 1px solid var(--line); padding: 8px 14px;
+    width: fit-content; margin-bottom: 30px;
+    background: rgba(56,189,248,0.06);
+}
+.cover-title {
+    font-size: 74px; font-weight: 700; line-height: 1.04;
+    letter-spacing: -1.5px; margin: 0 0 22px 0;
+    text-align: left;
+}
+.cover-title .hl { color: var(--cy); }
+.cover-sub {
+    font-size: 16.5px; line-height: 1.55; color: var(--dim);
+    max-width: 500px; margin-bottom: 42px; text-align: left;
+}
+.cover-stats { display: flex; flex-wrap: wrap; gap: 12px; max-width: 100%; }
+.cover-stat {
+    flex: 1 1 150px; min-width: 150px; max-width: 100%;
+    border: 1px solid var(--line2); background: rgba(14,22,38,0.72);
+    padding: 14px 16px; box-sizing: border-box;
+}
+.cover-stat .k {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim); margin-bottom: 6px;
+}
+.cover-stat .v { font-size: 19px; font-weight: 700; color: var(--ink); }
+.cover-stat .v em { color: var(--cy); font-style: normal; }
+.cover-bottomline {
+    position: absolute; bottom: 44px; left: 60px; right: 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--dim);
+    border-top: 1px solid var(--line2); padding-top: 16px;
+}
+
+/* ============ MAIN CONTENT (single flowing container) ============ */
+.main-content {
+    padding: 52px 58px 40px 58px;
+}
+.chapter-header {
+    break-after: avoid;
+    break-inside: avoid;
+    margin-top: 26px;
+    margin-bottom: 14px;
+}
+.chapter-header.first { margin-top: 0; }
+.sec-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 3px; color: var(--cy); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+}
+.sec-tag::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.sec-title {
+    font-size: 25px; font-weight: 700; line-height: 1.15;
+    letter-spacing: -0.3px; margin: 0 0 6px 0;
+    text-align: left;
+}
+.sec-lede {
+    font-size: 13.5px; color: var(--dim); margin: 6px 0 0 0; text-align: left;
+}
+.sub-title {
+    font-size: 15.5px; font-weight: 600; margin: 18px 0 8px 0;
+    break-after: avoid; display: flex; align-items: center; gap: 8px;
+    text-align: left;
+}
+.sub-title .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    border: 1px solid var(--line); padding: 2px 7px;
+}
+.body-text { margin: 0 0 11px 0; }
+.body-text b, .card b { color: var(--cy); font-weight: 600; }
+.strong { color: var(--ink); font-weight: 600; }
+
+/* ============ CARDS & PANELS ============ */
+.card {
+    break-inside: avoid;
+    border: 1px solid var(--line2);
+    background: var(--panel);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+.card .card-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 6px;
+}
+.card .card-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; text-align: left; }
+.card .card-body { font-size: 12px; color: var(--dim); text-align: left; }
+.card .card-body b { color: var(--ink); font-weight: 600; }
+.grid-2 { display: flex; flex-wrap: wrap; gap: 12px; max-width: 100%; margin-bottom: 12px; }
+.grid-2 > .card { flex: 1 1 280px; min-width: 260px; max-width: 100%; margin-bottom: 0; }
+
+.callout {
+    break-inside: avoid;
+    border-left: 3px solid var(--cy);
+    background: rgba(56,189,248,0.07);
+    padding: 12px 16px;
+    margin: 12px 0 14px 0;
+    font-size: 12.5px;
+}
+.callout .co-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 4px;
+}
+
+/* ============ STAT ROWS ============ */
+.stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; max-width: 100%; break-inside: avoid; }
+.stat {
+    flex: 1 1 130px; min-width: 120px; max-width: 100%;
+    border: 1px solid var(--line2); background: var(--panel);
+    padding: 12px 14px; box-sizing: border-box;
+}
+.stat .v { font-size: 22px; font-weight: 700; color: var(--cy); line-height: 1.1; margin-bottom: 4px; }
+.stat .k { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--dim); line-height: 1.4; }
+
+/* ============ TABLES ============ */
+table {
+    width: 100%; border-collapse: collapse; margin: 10px 0 14px 0;
+    font-size: 11.5px; table-layout: fixed;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px;
+    color: var(--cy); text-align: left; padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(56,189,248,0.05);
+}
+td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line2);
+    vertical-align: top; color: var(--ink); text-align: left;
+    overflow-wrap: break-word;
+}
+td .mono { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--dim); }
+td .m2 { color: var(--cy); }
+.tbl-note { font-size: 10.5px; color: var(--dim); font-family: 'JetBrains Mono', monospace; margin: -8px 0 12px 0; }
+.tbl-wrap-keep { break-inside: avoid; }
+
+/* ============ LISTS ============ */
+ul.tick, ol.tick { margin: 6px 0 12px 0; padding-left: 18px; }
+ul.tick li, ol.tick li {
+    margin-bottom: 6px; break-inside: avoid; text-align: left;
+    font-size: 12.5px;
+}
+ul.tick li::marker { color: var(--cy); }
+ol.tick li::marker { color: var(--cy); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+/* ============ TIMELINE / PHASES ============ */
+.phase {
+    break-inside: avoid;
+    border: 1px solid var(--line2); background: var(--panel);
+    margin-bottom: 12px; padding: 0;
+}
+.phase-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; border-bottom: 1px solid var(--line2);
+    background: rgba(56,189,248,0.05);
+}
+.phase-head .ph-time {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 700; color: var(--cy); letter-spacing: 1px;
+}
+.phase-head .ph-name { font-size: 13.5px; font-weight: 600; }
+.phase-body { padding: 11px 16px 6px 16px; font-size: 12px; color: var(--dim); text-align: left; }
+.phase-body ul { margin: 0 0 8px 0; padding-left: 16px; }
+.phase-body li { margin-bottom: 4px; font-size: 12px; }
+.phase-body li b { color: var(--ink); }
+.phase-gate {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    border-top: 1px dashed var(--line2); padding: 8px 16px; letter-spacing: 1px;
+}
+
+/* ============ ARCHITECTURE DIAGRAM ============ */
+.arch { margin: 14px 0; }
+.arch-layer {
+    border: 1px solid var(--line); background: rgba(56,189,248,0.04);
+    padding: 10px 14px; break-inside: avoid;
+}
+.arch-conn {
+    display: flex; justify-content: center; gap: 60px;
+    font-family: 'JetBrains Mono', monospace; color: var(--cy);
+    font-size: 12px; line-height: 1; padding: 5px 0;
+    break-inside: avoid; break-after: avoid;
+}
+.arch-ltitle {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--cy); margin-bottom: 8px;
+}
+.arch-nodes { display: flex; flex-wrap: wrap; gap: 8px; max-width: 100%; }
+.arch-node {
+    flex: 1 1 130px; min-width: 120px; max-width: 100%;
+    border: 1px solid var(--line2); background: var(--panel2);
+    padding: 8px 10px; text-align: left; box-sizing: border-box;
+}
+.arch-node .n { font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.arch-node .d { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); line-height: 1.5; }
+
+/* ============ CHECKLIST ============ */
+.check { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px 0; max-width: 100%; }
+.check-item {
+    flex: 1 1 320px; min-width: 280px; max-width: 100%;
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--line2); background: var(--panel);
+    padding: 10px 12px; font-size: 11.5px; color: var(--dim);
+    break-inside: avoid; text-align: left; box-sizing: border-box;
+}
+.check-item .bx {
+    flex-shrink: 0; width: 13px; height: 13px; border: 1px solid var(--cy);
+    margin-top: 2px; background: rgba(56,189,248,0.08);
+}
+.check-item b { color: var(--ink); font-weight: 600; }
+
+/* ============ ENDING ============ */
+.ending {
+    width: 720px; height: 1020px; box-sizing: border-box;
+    break-before: page; position: relative;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 60px;
+    background:
+        radial-gradient(circle at 360px 1148px, transparent 306px, rgba(56,189,248,0.14) 307px 309px, transparent 310px),
+        radial-gradient(circle at 360px 1148px, transparent 206px, rgba(56,189,248,0.09) 207px 209px, transparent 210px),
+        radial-gradient(ellipse 90% 50% at 50% 115%, rgba(56,189,248,0.16), transparent 65%),
+        var(--bg);
+}
+.ending .stars {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 18% 28%, rgba(231,238,249,0.6) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 36% 72%, rgba(231,238,249,0.45) 50%, transparent 51%),
+        radial-gradient(1px 1px at 58% 18%, rgba(231,238,249,0.55) 50%, transparent 51%),
+        radial-gradient(1px 1px at 74% 62%, rgba(231,238,249,0.4) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 90% 38%, rgba(231,238,249,0.5) 50%, transparent 51%);
+}
+.end-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px;
+    color: var(--cy); margin-bottom: 26px;
+}
+.end-big { font-size: 46px; font-weight: 700; line-height: 1.16; letter-spacing: -1px; margin-bottom: 26px; text-align: left; }
+.end-big .hl { color: var(--cy); }
+.end-text { font-size: 14px; color: var(--dim); max-width: 520px; margin-bottom: 38px; text-align: left; }
+.end-final {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px;
+    color: var(--dim); border-top: 1px solid var(--line2); padding-top: 18px;
+    display: flex; justify-content: space-between;
+}
+
+/* ============ CHALLENGE DOSSIER EXTENSIONS ============ */
+.ch-card {
+    break-inside: avoid;
+    border: 1px solid var(--line2);
+    background: var(--panel);
+    padding: 0; margin-bottom: 14px; box-sizing: border-box;
+}
+.ch-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; border-bottom: 1px solid var(--line2);
+    background: rgba(56,189,248,0.05);
+}
+.ch-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+    color: var(--cy); letter-spacing: 1px;
+}
+.ch-name { font-size: 13.5px; font-weight: 600; flex: 1 1 300px; min-width: 200px; text-align: left; }
+.ch-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.diff {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    padding: 2px 8px; border: 1px solid var(--line2); color: var(--dim);
+}
+.diff.adv { color: #F59E0B; border-color: rgba(245,158,11,0.4); }
+.diff.int { color: var(--cy); border-color: var(--line); }
+.diff.yth { color: #A5B4FC; border-color: rgba(165,180,252,0.4); }
+.ch-body { padding: 11px 16px 4px 16px; font-size: 12px; color: var(--dim); text-align: left; }
+.ch-body b { color: var(--ink); font-weight: 600; }
+.ch-body .hl-cy { color: var(--cy); font-weight: 600; }
+.dims { padding: 6px 16px 4px 16px; }
+.dim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; max-width: 100%; }
+.dim-row .dl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    color: var(--dim); width: 128px; flex-shrink: 0; text-align: left;
+}
+.dim-row .track { flex: 1 1 auto; height: 5px; background: rgba(140,160,190,0.15); position: relative; }
+.dim-row .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--cy); }
+.dim-row .dv {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cy);
+    width: 30px; flex-shrink: 0; text-align: right;
+}
+.ch-verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    color: var(--dim); border-top: 1px dashed var(--line2);
+    padding: 8px 16px; margin-top: 8px; text-align: left;
+}
+.ch-verdict b { color: var(--cy); font-weight: 700; }
+.tier { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 700; letter-spacing: 2px; padding: 3px 10px; border: 1px solid var(--line); }
+.tier.s { color: #070B14; background: var(--cy); border-color: var(--cy); }
+.tier.a { color: var(--cy); background: rgba(56,189,248,0.08); }
+.tier.b { color: var(--dim); border-color: var(--line2); }
+.tier.c { color: #64748B; border-color: rgba(100,116,139,0.4); }
+.rank-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cy); }
+.wp { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body>
+<!-- ==================== PDF2 COVER ==================== -->
+<div class="cover">
+    <div class="stars"></div>
+    <div class="cover-topline">
+        <span><span class="dot">&#9650;</span> FLAGSHIP BUILD BIBLE // CHALLENGE #09 &mdash; SOLO API EDITION</span>
+        <span>DOC-ID: SP-2026-007</span>
+    </div>
+    <div class="cover-badge">NASA SPACE APPS 2026 &nbsp;&#9670;&nbsp; HARMONIZATION OF MODIS &amp; VIIRS HOT SPOTS</div>
+    <h1 class="cover-title"><div>PYRO&shy;CHRON</div><div class="hl">BUILD BIBLE</div></h1>
+    <p class="cover-sub">Portion by portion, step by step, from an empty public repository to a deployed, judged, submitted product. Every input arrives over an API, every computation runs in continuous integration, every feature has a deterministic core &mdash; built by one operator directing chat assistants.</p>
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <div class="k">EXECUTION UNITS</div>
+            <div class="v"><em>10</em> PORTIONS P0&ndash;P9</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">NASA API FAMILIES</div>
+            <div class="v"><em>6</em> DOCUMENTED</div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">FUSED RECORD</div>
+            <div class="v">MODIS <em>2000</em> + VIIRS <em>2012</em></div>
+        </div>
+        <div class="cover-stat">
+            <div class="k">INFRASTRUCTURE BILL</div>
+            <div class="v"><em>$0</em> / MONTH</div>
+        </div>
+    </div>
+    <div class="cover-bottomline">
+        <span>PREPARED BY: MISSION COMMAND</span>
+        <span>REV 2.0 // SOLO API EDITION</span>
+    </div>
+</div>
+
+<div class="main-content">
+
+<!-- ============ BRIEFING ============ -->
+<div class="chapter-header first">
+    <div class="sec-tag">TRANSMISSION 007 // EXECUTION ORDERS</div>
+    <div class="sec-title">How to Run This Bible</div>
+    <p class="sec-lede">Ten portions, one contract, zero improvisation.</p>
+</div>
+
+<p class="body-text">This document is the complete execution layer for PYROCHRON under the chat-only, API-only operating system defined in SP-2026-006. It is organized as <b>ten portions</b>, P0 through P9, each a self-contained unit of work with five fields: <b>GOAL</b> (what exists when the portion is done), <b>STEPS</b> (the ordered actions), <b>PROMPT RECIPE</b> (the paste-ready instruction for the chat assistant that does the coding), <b>ACCEPTANCE</b> (the objective test that must pass), and <b>COMMIT</b> (the message that lands in history). A portion is either done &mdash; acceptance green, commit pushed &mdash; or not started; there is no &ldquo;mostly done,&rdquo; because the gates in the war schedule assume green commits, not intentions.</p>
+
+<p class="body-text">Four iron rules govern the whole weekend. <b>Demo-first ordering:</b> portions are sequenced so a demoable product exists from Hour 24 and nothing before the hero screen is gold-plated. <b>Commit every portion:</b> CI proves each claim; a red test reverts, never lingers. <b>No refactor after P7:</b> from automation onward, changes are additive patches, because the video and the pitch need a stable stage. <b>Deterministic-first:</b> every feature begins as plain statistics and static files; hosted AI is a stretch flag, never a dependency. The science specification lives in Section 03 and is deliberately written as implementable pseudocode &mdash; hand it to a chat assistant verbatim and the harmonization engine is real within a focus cycle.</p>
+
+<div class="callout">
+    <div class="co-tag">THE PORTION CONTRACT</div>
+    GOAL &rarr; STEPS &rarr; PROMPT RECIPE &rarr; ACCEPTANCE &rarr; COMMIT. If any field is missing, the portion is not ready to run. If all five are green, the next portion starts within minutes. The bible is written so that no decision is made during the event that could have been made before it.
+</div>
+
+<!-- ============ S1 ARCHITECTURE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 01 // SYSTEM ARCHITECTURE REV 2</div>
+    <div class="sec-title">APIs In, Artifacts Out, Nothing Alive in Between</div>
+    <p class="sec-lede">The whole system is a pipeline from NASA&rsquo;s servers to a CDN, with exactly one live function.</p>
+</div>
+
+<div class="arch">
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 1 // NASA DATA SOURCES &mdash; AUTHENTIC, PUBLIC, API-DELIVERED</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">FIRMS NRT API</div><div class="d">MODIS + VIIRS active fire points, last days, CSV by bbox</div></div>
+            <div class="arch-node"><div class="n">FIRMS ARCHIVE</div><div class="d">2000&ndash;present standard-quality record via Earthdata</div></div>
+            <div class="arch-node"><div class="n">GIBS WMTS</div><div class="d">basemap + context layers for the map view</div></div>
+            <div class="arch-node"><div class="n">APPEEARS API</div><div class="d">MCD64A1 burned area for validation</div></div>
+            <div class="arch-node"><div class="n">POWER + EONET</div><div class="d">fire-weather indices; event cross-reference cards</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; scheduled + triggered</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 2 // GITHUB ACTIONS CI &mdash; THE ONLY COMPUTE WE OWN</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">INGEST WORKFLOW</div><div class="d">cron every 6h; archive backfill + NRT append, retry + backoff</div></div>
+            <div class="arch-node"><div class="n">HARMONIZE + PRODUCTS</div><div class="d">calibration, FAI grid, climatology, anomalies &rarr; JSON</div></div>
+            <div class="arch-node"><div class="n">ALERTS</div><div class="d">Telegram digest + threshold alarms; deploy hook</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; commits static products</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">STAGE 3 // DELIVERY &mdash; STATIC EVERYTHING, ONE PROXY</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">STATIC JSON PRODUCTS</div><div class="d">calendar / clim / events / meta, &le;5MB each, in-repo</div></div>
+            <div class="arch-node"><div class="n">NEXT.JS STATIC EXPORT</div><div class="d">MapLibre + GIBS; calendar + explorer UI</div></div>
+            <div class="arch-node"><div class="n">1 SERVERLESS PROXY</div><div class="d">live NRT passthrough, key stays server-side</div></div>
+            <div class="arch-node"><div class="n">VERCEL / NETLIFY</div><div class="d">CDN hosting, preview URLs, $0</div></div>
+        </div>
+    </div>
+</div>
+
+<p class="body-text">Read the diagram as a numbered data flow: <b>(1)</b> scheduled and manual triggers run the ingest workflow, which pulls the recent active-fire record from FIRMS and, on demand, backfills from the archive; <b>(2)</b> the harmonize-and-products job calibrates the two sensor records onto one grid, computes climatology and anomalies, and writes versioned JSON products; <b>(3)</b> the products are committed to the repository, which triggers the hosting platform to publish the static front-end; <b>(4)</b> the alert workflow compares the newest anomalies against thresholds and sends the Telegram digest; <b>(5)</b> in the browser, the app reads only committed products from the CDN, with the single serverless proxy as the optional live window onto the last few days. Nothing persists state anywhere: no database, no session store, no cache to invalidate &mdash; git is the database, and the commit log is the audit trail a judge can walk end to end.</p>
+
+<div class="callout">
+    <div class="co-tag">WHY THIS SHAPE WINS</div>
+    Every judge-visible property &mdash; instant load, replayable pipeline, honest lineage, zero-drama demo &mdash; is a direct consequence of the shape. The architecture is not a constraint artifact; it is the Best-Use-of-Data argument rendered as software.
+</div>
+<!-- ============ S2 API ARSENAL ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 02 // THE NASA API ARSENAL</div>
+    <div class="sec-title">Six Families, Exact Endpoints, Zero Guesswork</div>
+    <p class="sec-lede">Every input the app consumes, with its URL pattern, auth, and limits &mdash; verified before the event.</p>
+</div>
+
+<p class="body-text">The build consumes six NASA data families, and all six are free, documented, and reachable over plain HTTPS. The <b>critical path</b> uses only the first two rows of the table below &mdash; FIRMS for the fire record itself, GIBS for map context &mdash; and the rest enrich the product: MCD64A1 burned area validates the harmonized calendar against physical truth, POWER supplies fire-weather context for the report panels, and EONET converts big anomaly spikes into named, citable events. Each family&rsquo;s auth model is deliberately simple: one free MAP_KEY, one free Earthdata login, and nothing else. The Hour 0&ndash;2 data check in the war schedule pings every row of this table before the challenge commitment, so no rate limit or schema surprise is discovered mid-build.</p>
+
+<table>
+    <colgroup><col style="width:17%"><col style="width:38%"><col style="width:12%"><col style="width:33%"></colgroup>
+    <thead><tr><th>FAMILY</th><th>ENDPOINT PATTERN</th><th>AUTH</th><th>ROLE &amp; LIMITS</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><b>FIRMS NRT</b><br><span class="mono">critical path</span></td>
+            <td class="mono">firms.modaps.eosdis.nasa.gov/api/area/csv/{MAP_KEY}/{SOURCE}/{s},{w},{n},{e}/{DAY_RANGE}/{DATE}</td>
+            <td class="mono">MAP_KEY</td>
+            <td>Recent active-fire CSV by bounding box. Sources: MODIS_NRT (C6.1), VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT (+NOAA-21). DAY_RANGE window is capped per current docs (5&ndash;10 days &mdash; <b>confirm exact cap at Hour 0</b>); loop calls to backfill. Free key from the FIRMS map-key page.</td>
+        </tr>
+        <tr>
+            <td><b>FIRMS ARCHIVE</b><br><span class="mono">critical path</span></td>
+            <td class="mono">Archive Download Tool / Earthdata &rarr; per-AOI yearly CSV (MCD14ML standard quality; VIIRS V2)</td>
+            <td class="mono">Earthdata</td>
+            <td>The 2000&ndash;present spine. MODIS from Nov 2000; VIIRS 375&nbsp;m from 20 Jan 2012. Pulled <b>pre-event</b> for the 12 preset AOIs and committed to the repo (bounded boxes keep each year&rsquo;s CSV small); refreshed live by NRT during the event.</td>
+        </tr>
+        <tr>
+            <td><b>GIBS WMTS</b><br><span class="mono">context</span></td>
+            <td class="mono">gibs.earthdata.nasa.gov/wmts/epsg3857/best/{LAYER}/default/{TIME}/{z}/{y}/{x}.jpg</td>
+            <td class="mono">none</td>
+            <td>Basemap and fire-weather context tiles (True Color, Thermal Anomalies layers) behind MapLibre. No key; rate-limited politely. Degrades to a plain dark style offline &mdash; demo never depends on it.</td>
+        </tr>
+        <tr>
+            <td><b>AppEEARS API</b><br><span class="mono">validation</span></td>
+            <td class="mono">appeears.earthdatacloud.nasa.gov/api &mdash; POST /login (Bearer), POST /task (area), GET /task/{id}, bundle download</td>
+            <td class="mono">Earthdata</td>
+            <td>MCD64A1 v061 monthly 500&nbsp;m burned area for the 12 AOIs; pre-event task runs produce the validation ground truth for Section 03&rsquo;s correlation check. One token, one queue &mdash; submit early, poll later.</td>
+        </tr>
+        <tr>
+            <td><b>POWER API</b><br><span class="mono">enrichment</span></td>
+            <td class="mono">power.latonaservices.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,WS2M,PRECTOTCORR&community=AG&latitude=&hellip;&longitude=&hellip;</td>
+            <td class="mono">none</td>
+            <td>Fire-weather context (temperature, humidity, wind, precipitation) for report panels &mdash; pre-event pulls for climatology weeks; static JSON, no runtime calls.</td>
+        </tr>
+        <tr>
+            <td><b>EONET v3</b><br><span class="mono">enrichment</span></td>
+            <td class="mono">eonet.gsfc.nasa.gov/api/v3/events?category=wildfires&status=all</td>
+            <td class="mono">none</td>
+            <td>Named event cross-reference: when the calendar flags an anomalous week, EONET supplies the human-readable headline and geometry for the event cards.</td>
+        </tr>
+    </tbody>
+</table>
+<div class="tbl-note">All rows free of charge. FIRMS key + Earthdata login registered at Portion P0; credentials live only in GitHub Actions secrets, never in client code.</div>
+
+<!-- ============ S3 HARMONIZATION ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 03 // THE HARMONIZATION ENGINE &mdash; FULL SPECIFICATION</div>
+    <div class="sec-title">Two Sensors, One Calendar, Written as Arithmetic</div>
+    <p class="sec-lede">Deterministic, documented, and implementable by a chat assistant in one focus cycle.</p>
+</div>
+
+<p class="body-text">The engine turns two sensor archives into one activity calendar in five steps, each of which is a pure function a judge can audit. <b>Step 1 &mdash; unify the schema.</b> Every detection, from either sensor, becomes <span class="mono">{date, lat, lon, sensor, satellite, frp_mw, conf_raw, conf_q, daynight}</span>, where confidence is remapped to a shared four-band scale. <b>Step 2 &mdash; calibrate the sensors.</b> On the 2012&ndash;2025 overlap, VIIRS 375&nbsp;m reliably out-detects MODIS 1&nbsp;km (smaller pixels, finer thresholds); the engine measures that gap rather than assuming it: for each cell-month it computes the ratio of high-confidence VIIRS detections to high-confidence MODIS detections, then smooths those ratios into a seasonal transfer function <span class="mono">k(month)</span> per region. The pre-2012 MODIS-only era is inflated by <span class="mono">k</span> into &ldquo;VIIRS-equivalent&rdquo; detections &mdash; a conservative, disclosed correction, with <span class="mono">k</span> floored at 1.0 so it never deflates a detection.</p>
+
+<p class="body-text"><b>Step 3 &mdash; compute the Fire Activity Index.</b> Per 0.25&deg; cell and day, <span class="mono">FAI = &alpha;&middot;N_scaled + &beta;&middot;log&#8321;(&#8321;+FRP_sum)</span> with defaults &alpha;=1, &beta;=0.5 &mdash; a blend of detection count and radiative power that resists both tiny-flare noise and single-megafire domination; defaults are stated and sensitivity-tested in the methodology page. <b>Step 4 &mdash; climatology and anomalies.</b> Weekly FAI (ISO weeks) against a 2003&ndash;2019 baseline per week-of-year and cell yields mean and standard deviation; the anomaly is a plain z-score, highlighted at <span class="mono">|z| &ge; 2</span>. The baseline stops at 2019 so recent extreme years cannot normalize themselves. <b>Step 5 &mdash; validate.</b> Monthly FAI totals are correlated with MCD64A1 burned area per AOI (target Pearson <span class="mono">r &ge; 0.6</span>); the coefficients land on the methodology page. A calendar that survives that check is not a visualization &mdash; it is a measurement.</p>
+
+<div class="card">
+    <div class="card-tag">PSEUDOCODE // HARMONIZE.PY &mdash; HAND TO THE DATA SESSION VERBATIM</div>
+    <div class="card-body mono" style="font-size:10.5px; line-height:1.7;">
+        load detections(aoi, sensor) &rarr; unified schema &nbsp;&nbsp;# FIRMS archive CSVs, then NRT append<br>
+        remap_conf: MODIS 0-100 &rarr; Q1(&ge;80) Q2(50-79) Q3(30-49) Q4(&lt;30); VIIRS h/n/l &rarr; Q1/Q2/Q3<br>
+        keep conf_q in {Q1,Q2} for FAI &nbsp;&nbsp;# Q3+ kept for event cards only<br>
+        k[month] = median over cells of count(VIIRS Q1) / count(MODIS Q1) on 2012&ndash;2025 overlap<br>
+        scale: N_modis_era &times;= max(k[month], 1.0) &nbsp;&nbsp;# pre-2012 &rarr; VIIRS-equivalent<br>
+        fai[cell,day] = 1&middot;N_scaled + 0.5&middot;log1p(sum FRP_mw) on 0.25&deg; grid<br>
+        weekly[year,week] = sum fai over days &rarr; calendar grid<br>
+        clim[week_of_year] = mean,std of weekly[2003..2019] &rarr; z = (x&minus;mean)/std<br>
+        events = DBSCAN(eps=0.3&deg;, min_samples=5) on weekly detections &rarr; top by FAI<br>
+        validate: pearson(monthly_fai, mcd64a1_burned_area) per AOI &rarr; report if r &ge; 0.6<br>
+        write products: calendar.json, clim.json, events.json, meta.json (k table + lineage)
+    </div>
+</div>
+
+<div class="callout">
+    <div class="co-tag">HONESTY CLAUSE // WHAT WE CLAIM AND WHAT WE DO NOT</div>
+    We claim a <b>disclosed, reproducible bias correction</b>, not a perfect sensor model. The methodology page states the transfer function&rsquo;s construction, its seasonal smoothing, the FAI constants, and the validation coefficient &mdash; and names the limitations (375&nbsp;m vs 1&nbsp;km pixel mixing, nighttime detection asymmetry, small-fire under-detection pre-2012). Judges reward candor calibrated with numbers; the r-value is the proof, the limitations are the credibility.
+</div>
+<!-- ============ S4 DATA PRODUCTS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 04 // DATA PRODUCTS</div>
+    <div class="sec-title">Twelve Windows on the Fire World, Five Files Each</div>
+    <p class="sec-lede">The app renders committed JSON &mdash; nothing else. Here is the complete catalog.</p>
+</div>
+
+<p class="body-text">Twelve preset AOIs give the product its global voice &mdash; Amazon, Congo Basin, Borneo&ndash;Sumatra, Southeast Australia, California, the Mediterranean, Central Siberia, Central India, the Sahel, boreal Canada, the Pantanal, and a Global aggregate &mdash; each a fixed bounding box small enough that twenty-five years of detections fit in a few megabytes. Per AOI the pipeline writes five files: <span class="mono">calendar.json</span> (years &times; 52 ISO weeks of FAI plus z-scores &mdash; the hero grid), <span class="mono">clim.json</span> (the 2003&ndash;2019 week-of-year baseline), <span class="mono">events.json</span> (clustered top fire events with FRP sums and EONET cross-references), and <span class="mono">meta.json</span> (lineage: source URLs, pull dates, the k-table, license notes); a fifth file, <span class="mono">reports.json</span>, carries the build-time narrative summaries generated pre-event in the operator&rsquo;s chat window. A global <span class="mono">manifest.json</span> lists every file, its size, and its commit &mdash; and the build script enforces the budget: <b>&le;5 MB per product, &le;40 MB total</b>, or the workflow fails rather than shipping bloat.</p>
+
+<table>
+    <colgroup><col style="width:20%"><col style="width:44%"><col style="width:36%"></colgroup>
+    <thead><tr><th>PRODUCT FILE</th><th>CONTENT</th><th>BUDGET &amp; CONSUMER</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">calendar.json</td><td>Per AOI: rows = years 2000&ndash;present, cols = ISO weeks; FAI value + z-score + detection counts by sensor</td><td>&le;1 MB; the Calendar hero screen</td></tr>
+        <tr><td class="mono">clim.json</td><td>Week-of-year baseline mean/std per AOI from 2003&ndash;2019</td><td>&le;100 KB; anomaly rendering, forecast panel</td></tr>
+        <tr><td class="mono">events.json</td><td>Clustered events: centroid, period, peak FAI, FRP sum, nearest EONET title</td><td>&le;1 MB; explorer cards, report panels</td></tr>
+        <tr><td class="mono">meta.json + manifest</td><td>Lineage (sources, dates, k-table, FAI constants), file manifest with sizes</td><td>&le;100 KB; methodology page footer</td></tr>
+    </tbody>
+</table>
+
+<!-- ============ P0 ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTIONS 05&ndash;14 // THE TEN PORTIONS</div>
+    <div class="sec-title">P0 Setup &bull; P1 Ingest &bull; P2 Harmonize</div>
+    <p class="sec-lede">Foundation portions: accounts armed, data flowing, science proven &mdash; before any UI exists.</p>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P0</span><span class="ph-name">Mission Setup &mdash; accounts, repo, CI, secrets</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A public GitHub repo with the three workflows stubbed and green, a FIRMS MAP_KEY and Earthdata login in encrypted secrets, Vercel/Netlify connected for preview deploys, and a Telegram bot token issued &mdash; the entire $0 infrastructure standing before any science.</p>
+        <ul>
+            <li>Register FIRMS MAP_KEY (firms.modaps.eosdis.nasa.gov &rarr; API map key) and an Earthdata account; store both as Actions secrets: <span class="mono">FIRMS_MAP_KEY</span>, <span class="mono">EARTHDATA_USER</span>, <span class="mono">EARTHDATA_PASS</span>.</li>
+            <li>Create public repo <span class="mono">pyrochron</span>; enable Actions; paste the three stub workflows (echo job) from the bootstrap prompt below.</li>
+            <li>Create the Telegram bot via BotFather; store <span class="mono">TELEGRAM_TOKEN</span> and your chat id as secrets; connect repo to Vercel or Netlify for branch previews.</li>
+            <li>Create <span class="mono">deviations.md</span>, <span class="mono">parking-lot.md</span>, and the issue template that doubles as the task-card format.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write three minimal GitHub Actions workflow YAMLs for a public repo: <span class="mono">ingest.yml</span> (cron every 6 hours + workflow_dispatch), <span class="mono">products.yml</span> (workflow_run after ingest), <span class="mono">alerts.yml</span> (workflow_run after products). Each has one placeholder step echoing &lsquo;P0 stub&rsquo;. Add comments citing that cron requires a public repo on the free plan. Python 3.11, ubuntu-latest, concurrency group per workflow.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> All three workflows show green on their first run; a test Telegram message arrives via a curl from your machine using the token.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P0: infrastructure armed &mdash; 3 workflows green, secrets stored, bot live&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P1</span><span class="ph-name">Ingest &mdash; archive spine + NRT heartbeat</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/ingest_archive.py</span> and <span class="mono">scripts/ingest_nrt.py</span> run inside Actions: the archive script loads the pre-event per-AOI CSVs (committed under <span class="mono">data/archive/</span>) into unified parquet; the NRT script pulls the last days from the FIRMS API for all 12 AOIs with retry + backoff and appends a parquet delta.</p>
+        <ul>
+            <li><b>Pre-event (manual, one evening):</b> export archive CSVs per AOI per sensor from the FIRMS Archive Download Tool with Earthdata auth; commit under <span class="mono">data/archive/{aoi}/</span> (bounded boxes keep files small; gzip if needed).</li>
+            <li>Unified schema on load: <span class="mono">date, lat, lon, sensor, satellite, frp_mw, conf_raw, daynight</span>; drop exact duplicates; QA row counts vs FIRMS portal numbers for one known month.</li>
+            <li>NRT script reads <span class="mono">FIRMS_MAP_KEY</span> from env only; loop AOIs; sleep politely between calls; write <span class="mono">data/nrt/latest.parquet</span> + a run summary to the workflow log.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">ingest_nrt.py</span>: for each AOI bbox in <span class="mono">aois.json</span>, GET the FIRMS area CSV URL pattern for sources MODIS_NRT, VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT with DAY_RANGE at the documented cap, MAP_KEY from env FIRMS_MAP_KEY. Tenacity retry (5 tries, exponential backoff). Parse CSV to pandas with columns latitude, longitude, bright_ti4/scan, acq_date, acq_time, satellite, instrument, confidence, frp, daynight; map to the unified schema; concat, dedupe, save parquet. Print row counts per source. Style: stdlib + pandas + requests only.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Manual dispatch of <span class="mono">ingest.yml</span> produces <span class="mono">latest.parquet</span> as an artifact with plausible counts (e.g., tens of thousands of global detections per day band) and zero dropped AOIs.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P1: data flows &mdash; archive spine loaded, NRT heartbeat green&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P2</span><span class="ph-name">Harmonize &mdash; the science, executed in CI</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/harmonize.py</span> implements Section 03 end to end in CI: confidence remap, overlap calibration k-table, FAI grid, weekly calendar, climatology, z-scores, event clustering, and the MCD64A1 validation coefficient &mdash; writing its outputs into <span class="mono">data/interim/</span> for P3 to package.</p>
+        <ul>
+            <li>Implement exactly the pseudocode in Section 03; keep every constant (Q-bands, k floor, &alpha;, &beta;, baseline window, DBSCAN params) in a single <span class="mono">CONFIG</span> dict at the top &mdash; the methodology page will render this dict verbatim.</li>
+            <li>Log the calibration table (month &rarr; k per region) and the per-AOI Pearson r to the workflow log; fail the workflow if r &lt; 0.6 for the Global AOI (quality gate).</li>
+            <li>Plot nothing, print everything &mdash; logs are the audit trail; artifacts carry the interim parquets.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Implement <span class="mono">harmonize.py</span> from this spec verbatim [paste Section 03 pseudocode block]. Inputs: parquets from P1 under data/. Use pandas, numpy, scipy.stats.pearsonr, sklearn.cluster.DBSCAN. CONFIG dict first; pure functions after; main() orchestrates and prints the calibration table and r-values. No plotting libraries.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Products job green with a printed k-table in a plausible range (1.0&ndash;4.0, seasonally varying) and Global r &ge; 0.6; spot-check one known extreme week (e.g., 2019&ndash;20 Australian summer) shows |z| &gt; 2 in the interim output.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P2: two sensors, one calendar &mdash; r=0.6x on Global&rdquo;</div>
+</div>
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P3</span><span class="ph-name">Products &mdash; frozen JSON, budgeted and manifest-ed</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/build_products.py</span> converts P2&rsquo;s interim output into the four product files per AOI plus the global manifest, enforces the size budget, and commits them to the repo &mdash; the handoff point where CI output becomes CDN content.</p>
+        <ul>
+            <li>Write <span class="mono">products/{aoi}/calendar.json</span>, <span class="mono">clim.json</span>, <span class="mono">events.json</span> and <span class="mono">products/meta.json</span> + <span class="mono">products/manifest.json</span> (file, bytes, commit sha, generated-at).</li>
+            <li>Fail the workflow if any file exceeds 5 MB or the total exceeds 40 MB; round floats to 3 decimals to shrink payloads; z-scores stored to 2 decimals.</li>
+            <li>The workflow commits products with the bot-style message <span class="mono">products: rebuild &lt;date&gt; (n detections)</span> &mdash; this commit is what triggers the deploy.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">build_products.py</span>: read interim parquets from data/interim/, emit the JSON products exactly per this schema [paste Section 04 table]. Include a <span class="mono">--check</span> mode that walks products/ and fails on budget breach. Then write the commit step for <span class="mono">products.yml</span> using git-auto-commit style shell (add products/, commit with message, push) guarded by &lsquo;git diff --quiet&rsquo;.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> <span class="mono">products.yml</span> green; manifest lists all 13 AOI product sets with sizes under budget; a committed product appears in the repo tree.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P3: products frozen &mdash; 40MB budget enforced by CI&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P4</span><span class="ph-name">Front-end shell &mdash; static export, map first</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A Next.js static-export app deployed to the hosting preview: dark mission-control UI, MapLibre globe with GIBS tiles, AOI switcher for the 12 presets, and a data-loader that reads the committed JSON products. By the end of P4 the deployment URL is the project&rsquo;s public face.</p>
+        <ul>
+            <li>Pages: <span class="mono">/</span> (hero calendar + map), <span class="mono">/explore/[aoi]</span> (region drill-down), <span class="mono">/method</span> (methodology page), <span class="mono">/about</span> (team, data policy, licenses).</li>
+            <li>MapLibre style: dark base + GIBS <span class="mono">VIIRS_SNPP_CorrectedReflectance_TrueColor</span> and <span class="mono">MODIS_Terra_Thermal_Anomalies_All</span> raster sources; tiles fail silently to the dark base style.</li>
+            <li>Component tree fixed here and never re-litigated: <span class="mono">AoiSwitcher / CalendarGrid / YearScrubber / AnomalyLegend / EventCards / ReportPanel / MapPane</span>.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Scaffold Next.js 14 app-router with <span class="mono">output: &lsquo;export&rsquo;</span>, Tailwind off, plain CSS modules, dark theme tokens #070B14/#0E1626/#38BDF8/#E7EEF9, font Space Grotesk + JetBrains Mono via Google Fonts. Build the component tree [list above] with typed props and stub bodies reading from <span class="mono">/products/{aoi}/calendar.json</span> at build time (statically generate <span class="mono">/explore/[aoi]</span> from the 12 AOI ids via generateStaticParams). Add MapLibre via <span class="mono">maplibre-gl</span> with the GIBS raster source and graceful onError fallback. Print the exact commands to run and deploy.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Preview URL loads all four routes; Lighthouse performance &ge; 90 on <span class="mono">/</span>; switching AOI refetches products and re-renders without errors.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P4: shell deployed &mdash; preview URL live, map tiles on&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P5</span><span class="ph-name">Calendar hero &mdash; the 90-second screen</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The signature artifact: a 25-year &times; 52-week heatmap per AOI &mdash; GitHub-contribution style but for fire &mdash; with year scrubber, tooltips (FAI, detections by sensor, FRP), anomaly pulsing at <span class="mono">|z| &ge; 2</span>, and the climatology baseline drawn beneath. This screen alone can carry the demo.</p>
+        <ul>
+            <li>Render as SVG cells (25 &times; 52 &asymp; 1,300 rects &mdash; trivial for the DOM); color scale from cool dark to amber/red on FAI percentile; anomaly cells get a cyan ring + pulse animation.</li>
+            <li>Tooltip on hover: date band, FAI, z, MODIS vs VIIRS-equivalent counts, top FRP day; the scrubber snaps to ISO weeks and syncs the map pane below to that week&rsquo;s detections layer.</li>
+            <li>One-click &ldquo;share this week&rdquo; copies a state URL (<span class="mono">?aoi=&amp;week=</span>) &mdash; judges paste it into their own browser and land exactly on the evidence.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Build <span class="mono">CalendarGrid</span> as pure SVG from calendar.json + clim.json: rows years, cols ISO weeks; fill from FAI percentile; ring+pulse where |z|&ge;2; hover tooltip component; YearScrubber + week sync via URL search params; share button copying the state URL. Accessibility: aria-labels per cell with week, year, and status; keyboard-focusable cells. No chart libraries.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> The 2019&ndash;20 Australian summer anomaly is visibly pulsing on first load of that AOI; tooltip data matches events.json; demo runs offline from committed products.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P5: hero live &mdash; 25 years, one glance, honest math&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P6</span><span class="ph-name">Region explorer &mdash; depth behind the hero</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The drill-down that converts wow into credibility: per-AOI panels with top event cards (EONET-titled), fire-weather context from POWER climatology, and the cached build-time fire-season narrative &mdash; plus the sensor-contribution strip showing MODIS-era vs VIIRS-era provenance per season.</p>
+        <ul>
+            <li>Event cards from <span class="mono">events.json</span>: period, peak FAI, z, FRP sum, EONET title link, and &ldquo;view in calendar&rdquo; deep link to the exact week.</li>
+            <li>Report panel: static narrative JSON generated pre-event in the operator&rsquo;s chat window (build-time AI, cached) &mdash; 120 words per AOI on typical fire season, worst years, and what the z-anomalies marked.</li>
+            <li>Provenance strip: for each year, the fraction of the record that is measured MODIS, measured VIIRS, and k-scaled MODIS &mdash; the honesty bar rendered as a UI element.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Build <span class="mono">ReportPanel</span> and <span class="mono">EventCards</span> from events.json + reports.json: card list with deep links to calendar state; provenance strip as a stacked horizontal bar (measured-MODIS / k-scaled / measured-VIIRS per year) from meta.json; all copy strings in a single <span class="mono">strings.ts</span> file for the i18n pass later.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> All 12 AOIs render full panels with zero console errors; every event card&rsquo;s deep link opens the calendar at the correct week.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P6: depth shipped &mdash; provenance visible, events citable&rdquo;</div>
+</div>
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P7</span><span class="ph-name">Automation &amp; alerts &mdash; the app that never sleeps</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The living system: every 6 hours CI refreshes the fire record, rebuilds products, republishes the site, and posts a Telegram digest; when a preset AOI&rsquo;s latest week crosses <span class="mono">|z| &ge; 2.5</span>, a threshold alarm fires with a deep link. This is the &ldquo;early warning&rdquo; verb of the brief, executed &mdash; and the automation showcase for the Best-Use-of-Technology eye.</p>
+        <ul>
+            <li>Wire <span class="mono">alerts.yml</span>: after products, run <span class="mono">scripts/alert_digest.py</span> &mdash; reads the newest <span class="mono">calendar.json</span> set, formats the digest (top 3 AOIs by latest-week FAI, any |z|&ge;2.5 flags), sends via Telegram Bot API from secrets.</li>
+            <li>Deploy hook: the products commit already triggers hosting; verify end-to-end latency (ingest &rarr; live site) under 15 minutes and note it in the methodology page &mdash; a judge-checkable claim.</li>
+            <li>Add <span class="mono">BOT.md</span>: how the bot behaves, how to subscribe (public channel), and the exact thresholds &mdash; transparency for the judges and a demo-able artifact.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">alert_digest.py</span>: load products/*/calendar.json, take last complete ISO week per AOI, compute FAI percentile within that AOI&rsquo;s history, build a digest message (plain text, emoji-free) listing top AOIs and |z|&ge;2.5 alarms with the site&rsquo;s state URL; POST to Telegram <span class="mono">sendMessage</span> using env TELEGRAM_TOKEN and TELEGRAM_CHAT_ID. requests only, no external deps.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> A real digest message arrives on the operator&rsquo;s phone within minutes of a manual products run; the alarm deep link opens the app at the flagged AOI and week.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P7: pipeline alive &mdash; 6h cadence, alarms wired, latency logged&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P8</span><span class="ph-name">QA &amp; polish &mdash; judge-proofing</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A submission that survives hostile review: zero console errors on every route, mobile-clean layout, accessibility pass, six-language static strings, and a methodology page that carries the calibration table, FAI constants, validation r-values, and limitations verbatim from <span class="mono">meta.json</span>.</p>
+        <ul>
+            <li>QA session drives the deployed preview via Playwright MCP: snapshot every route at desktop and mobile widths, capture screenshots, assert no error toasts, check focus order and aria-labels on the calendar grid.</li>
+            <li>i18n-lite: <span class="mono">strings.ts</span> expanded to EN/ES/FR/PT/HI/ID static translations (chat assistants translate; strings are short UI copy only) with a language switcher persisted in localStorage.</li>
+            <li>Methodology page rendered from <span class="mono">meta.json</span> + prose: pipeline diagram, k-table, FAI equation, r-values, limitations &mdash; the Best-Use-of-Science exhibit.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (QA SESSION).</b> &ldquo;Using the Playwright MCP tools against [preview URL]: navigate all routes, take accessibility snapshots and screenshots at 1440px and 390px, list any console errors, missing aria-labels, or overflow; produce a ranked fix list with file paths. Then translate strings.ts to ES/FR/PT/HI/ID keeping UI copy under 40 characters per string.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> QA checklist green on all routes and widths; the methodology page shows the same k-table and r-values the CI logs printed in P2 &mdash; numbers that agree across artifacts.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P8: judge-proof &mdash; QA green, 6 languages, method page live&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P9</span><span class="ph-name">Deploy &amp; submit &mdash; video, page, checklist</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A complete Space Apps submission: 3-minute video following the storyboard below, project page fields filled to sell the lanes, repo README rebuilt for judges, and the submission checklist ticked in order &mdash; submitted with hours to spare, not minutes.</p>
+        <ul>
+            <li>Video: screen-record the demo path (hero &rarr; anomaly &rarr; drill-down &rarr; methodology &rarr; bot message on phone), narrate with the script from the storyboard table, cut to 3:00 hard limit, captions burned in.</li>
+            <li>Project page: one-paragraph summary, the judge&rsquo;s 90-second demo path, data sources list with links, award-lane statement, team and tools (chat-assisted build disclosed proudly &mdash; Space Apps celebrates AI use).</li>
+            <li>README: repository map, replay-the-pipeline instructions (three workflow dispatches), license and NASA data policy notes.</li>
+        </ul>
+        <p><b>ACCEPTANCE.</b> Submission form complete with video link, demo URL, repo URL; the checklist below fully ticked; a fresh anonymous browser can run the 90-second demo path without guidance.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P9: submitted &mdash; video 3:00, page complete, checklist green&rdquo;</div>
+</div>
+
+<div class="sub-title"><span class="num">P9.1</span> The 3-Minute Video &mdash; Shot-by-Shot Storyboard</div>
+<table>
+    <colgroup><col style="width:12%"><col style="width:34%"><col style="width:30%"><col style="width:24%"></colgroup>
+    <thead><tr><th>TIME</th><th>SHOT</th><th>ON SCREEN</th><th>NARRATION BEAT</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">0:00&ndash;0:20</td><td>Cold open on the hero calendar</td><td>25-year grid, scrubber sweeping, anomalies pulsing</td><td>&ldquo;Since 2000, two NASA sensors have watched Earth burn &mdash; and never spoken the same language.&rdquo;</td></tr>
+        <tr><td class="mono">0:20&ndash;0:50</td><td>The seam, visualized</td><td>Split: raw MODIS vs raw VIIRS counts for one region</td><td>&ldquo;VIIRS sees smaller fires; MODIS saw twenty extra years. Naively stacked, the record lies.&rdquo;</td></tr>
+        <tr><td class="mono">0:50&ndash;1:30</td><td>Harmonization explained</td><td>k-table, FAI equation, baseline window on the method page</td><td>&ldquo;We measured the gap on the overlap years and built one calendar &mdash; validated against burned-area truth.&rdquo;</td></tr>
+        <tr><td class="mono">1:30&ndash;2:10</td><td>Region drill-down</td><td>2019&ndash;20 Australia anomaly; event cards with EONET titles; provenance strip</td><td>&ldquo;Every spike is citable, every number carries its lineage, every AOI has a report.&rdquo;</td></tr>
+        <tr><td class="mono">2:10&ndash;2:40</td><td>Living system</td><td>Actions workflow running; Telegram digest arriving on a phone</td><td>&ldquo;Every six hours the pipeline refreshes itself &mdash; and alerts when a fire week breaks the baseline.&rdquo;</td></tr>
+        <tr><td class="mono">2:40&ndash;3:00</td><td>Close on the mission</td><td>Global AOI, calendar zoom-out, team card</td><td>&ldquo;One calendar, twenty-five years, every corner of Earth. Built from NASA&rsquo;s open data &mdash; for the people in fire&rsquo;s path.&rdquo;</td></tr>
+    </tbody>
+</table>
+<!-- ============ S15 WAR SCHEDULE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 15 // THE 48-HOUR WAR SCHEDULE</div>
+    <div class="sec-title">Hour by Hour, Portion by Portion</div>
+    <p class="sec-lede">Sleep is a portion. The video is a portion. Nothing is optional.</p>
+</div>
+
+<table>
+    <colgroup><col style="width:16%"><col style="width:26%"><col style="width:34%"><col style="width:24%"></colgroup>
+    <thead><tr><th>HOURS</th><th>BLOCK</th><th>PORTIONS &amp; FOCUS</th><th>GATE AT BLOCK END</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">H0&ndash;H1</td><td><b>Read the field</b></td><td>Verify briefs vs dossier; run the three data pings (FIRMS NRT+archive, GIBS tile, one NASA variable series)</td><td>Default pick stands: PYROCHRON</td></tr>
+        <tr><td class="mono">H1&ndash;H2</td><td><b>Commit the challenge</b></td><td>Register project under #09; task cards filed as issues for P0&ndash;P3</td><td><b>SWAP RIGHTS EXPIRE</b></td></tr>
+        <tr><td class="mono">H2&ndash;H8</td><td><b>Foundation</b></td><td>P0 setup + P1 ingest (DATA session leads; FRONTEND session scaffolds in parallel)</td><td>CI green; parquet artifacts exist</td></tr>
+        <tr><td class="mono">H8&ndash;H14</td><td><b>SLEEP + buffer</b></td><td>Hard block; let archive backfill and any queued runs finish</td><td>Wake to green, or fix-forward</td></tr>
+        <tr><td class="mono">H14&ndash;H20</td><td><b>Science</b></td><td>P2 harmonize: k-table, FAI, climatology, validation r</td><td>Global r &ge; 0.6 printed in log</td></tr>
+        <tr><td class="mono">H20&ndash;H24</td><td><b>Products</b></td><td>P3 build + commit products; FRONTEND session finishes shell (P4) in parallel</td><td>Products in repo; preview URL live</td></tr>
+        <tr><td class="mono">H24&ndash;H32</td><td><b>Hero</b></td><td>P5 calendar grid to demo quality; P6 explorer behind it</td><td><b>90-second judge demo passes</b></td></tr>
+        <tr><td class="mono">H32&ndash;H38</td><td><b>SLEEP + buffer</b></td><td>Hard block; scheduled runs keep the site fresh</td><td>Wake to a live, fresh site</td></tr>
+        <tr><td class="mono">H38&ndash;H42</td><td><b>Alive</b></td><td>P7 automation: cron cadence, Telegram digest, threshold alarms, latency claim</td><td>Digest lands on the phone</td></tr>
+        <tr><td class="mono">H42&ndash;H45</td><td><b>Proof</b></td><td>P8 QA sweep via Playwright MCP; i18n pass; methodology page final</td><td>QA checklist green, console clean</td></tr>
+        <tr><td class="mono">H45&ndash;H48</td><td><b>Submit</b></td><td>P9 video per storyboard, project page, README, form, final verify in anonymous browser</td><td><b>SUBMITTED WITH BUFFER</b></td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">RHYTHM REMINDERS</div>
+    Three chat windows stay assigned: DATA owns <span class="mono">scripts/ + workflows</span>, FRONTEND owns the app, QA owns issues/docs/pitch. Every block ends on a commit; every red test reverts rather than lingers; every new idea goes to <span class="mono">parking-lot.md</span>, never into scope.
+</div>
+
+<!-- ============ S16 RISK + PROMPTS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 16 // RISK REGISTER &amp; PROMPT LIBRARY</div>
+    <div class="sec-title">Pre-Agreed Answers to the Weekend&rsquo;s Bad Nights</div>
+    <p class="sec-lede">Every failure mode has a named fallback; every fallback has a prompt already written.</p>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-tag">RISK // FIRMS API</div>
+        <div class="card-title">Day-range cap or rate limit blocks NRT pulls</div>
+        <div class="card-body"><b>Fallback:</b> loop smaller windows per AOI and cache responses in artifacts; if the API degrades fully, the committed archive spine plus last good NRT delta still powers the entire demo &mdash; the site never depends on a live call.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // VIIRS RECORD</div>
+        <div class="card-title">Sensor outage or gaps distort recent weeks</div>
+        <div class="card-body"><b>Fallback:</b> the anomaly engine marks weeks with &lt;80% expected passes as <span class="mono">low-confidence</span> in products; UI grays them; the digest skips flagged weeks &mdash; honesty rendered as behavior.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // CI</div>
+        <div class="card-title">Actions queue delays or 60-day cron disable</div>
+        <div class="card-body"><b>Fallback:</b> manual <span class="mono">workflow_dispatch</span> does everything cron does (demo the manual path); event weekend is fresh activity so disable rules are moot; queue delay is absorbed by the 6-hour cadence design.</div>
+    </div>
+    <div class="card">
+        <div class="card-tag">RISK // SCOPE</div>
+        <div class="card-title">Feature creep eats the video window</div>
+        <div class="card-body"><b>Fallback:</b> the H42 gate fires regardless of feature state &mdash; P9 starts on time because a submitted 90% beats an unsubmitted 100%. Parking-lot items are named in the project page as future work (judges read ambition as maturity).</div>
+    </div>
+</div>
+
+<div class="sub-title"><span class="num">16.1</span> Prompt Library &mdash; Six Skeletons Worth Pre-Writing</div>
+<table>
+    <colgroup><col style="width:22%"><col style="width:44%"><col style="width:34%"></colgroup>
+    <thead><tr><th>SKELETON</th><th>STRUCTURE</th><th>USED IN</th></tr></thead>
+    <tbody>
+        <tr><td><b>Bootstrap</b></td><td>&ldquo;Write {artifact} for a public repo; constraints: {list}; cite the platform rule that motivates each constraint.&rdquo;</td><td>P0 workflows, proxy function</td></tr>
+        <tr><td><b>Ingest</b></td><td>&ldquo;Write {script} reading {source}, mapping to {schema}, retry &times;5 backoff, print row counts per {group}; stdlib + pandas + requests only.&rdquo;</td><td>P1, any new connector</td></tr>
+        <tr><td><b>Spec-implement</b></td><td>&ldquo;Implement this spec verbatim: {pseudocode}. CONFIG dict first, pure functions after, main() orchestrates, no plotting.&rdquo;</td><td>P2, P3</td></tr>
+        <tr><td><b>Component</b></td><td>&ldquo;Build {component} from {json} with typed props, dark tokens, aria labels, keyboard support, no chart libs; state in URL params.&rdquo;</td><td>P4&ndash;P6</td></tr>
+        <tr><td><b>Debug loop</b></td><td>&ldquo;Here is the file: {paste}. Here is the verbatim error: {paste}. Fix minimally, return the full file, explain the cause in one line.&rdquo;</td><td>Everywhere, all weekend</td></tr>
+        <tr><td><b>QA sweep</b></td><td>&ldquo;Via Playwright MCP: snapshot {routes} at {widths}, list console errors, missing aria, overflow; ranked fix list with file paths.&rdquo;</td><td>P8, pre-demo checks</td></tr>
+    </tbody>
+</table>
+
+</div><!-- /main-content -->
+
+<!-- ==================== PDF2 ENDING ==================== -->
+<div class="ending">
+    <div class="stars"></div>
+    <div class="end-tag">END OF BUILD BIBLE // SP-2026-007</div>
+    <div class="end-big"><div>BUILD IT PORTION</div><div>BY PORTION.</div><div class="hl">SHIP IT HOUR BY HOUR.</div></div>
+    <div class="end-text">Ten portions stand between an empty repository and a global-award submission: armed infrastructure, flowing data, proven science, a hero screen judges can verify in ninety seconds, a pipeline that keeps working while you sleep, and a submission kit finished with hours to spare. The plan is total. The only remaining variable is execution.</div>
+    <div class="end-final">
+        <span>SUITE: SP-2026-001 &#9670; 002 &#9670; 003 &#9670; 006 &#9670; 007</span>
+        <span>MISSION COMMAND OUT</span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P3</span><span class="ph-name">Products &mdash; frozen JSON, budgeted and manifest-ed</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/build_products.py</span> converts P2&rsquo;s interim output into the four product files per AOI plus the global manifest, enforces the size budget, and commits them to the repo &mdash; the handoff point where CI output becomes CDN content.</p>
+        <ul>
+            <li>Write <span class="mono">products/{aoi}/calendar.json</span>, <span class="mono">clim.json</span>, <span class="mono">events.json</span> and <span class="mono">products/meta.json</span> + <span class="mono">products/manifest.json</span> (file, bytes, commit sha, generated-at).</li>
+            <li>Fail the workflow if any file exceeds 5 MB or the total exceeds 40 MB; round floats to 3 decimals to shrink payloads; z-scores stored to 2 decimals.</li>
+            <li>The workflow commits products with the bot-style message <span class="mono">products: rebuild &lt;date&gt; (n detections)</span> &mdash; this commit is what triggers the deploy.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">build_products.py</span>: read interim parquets from data/interim/, emit the JSON products exactly per this schema [paste Section 04 table]. Include a <span class="mono">--check</span> mode that walks products/ and fails on budget breach. Then write the commit step for <span class="mono">products.yml</span> using git-auto-commit style shell (add products/, commit with message, push) guarded by &lsquo;git diff --quiet&rsquo;.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> <span class="mono">products.yml</span> green; manifest lists all 13 AOI product sets with sizes under budget; a committed product appears in the repo tree.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P3: products frozen &mdash; 40MB budget enforced by CI&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P4</span><span class="ph-name">Front-end shell &mdash; static export, map first</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A Next.js static-export app deployed to the hosting preview: dark mission-control UI, MapLibre globe with GIBS tiles, AOI switcher for the 12 presets, and a data-loader that reads the committed JSON products. By the end of P4 the deployment URL is the project&rsquo;s public face.</p>
+        <ul>
+            <li>Pages: <span class="mono">/</span> (hero calendar + map), <span class="mono">/explore/[aoi]</span> (region drill-down), <span class="mono">/method</span> (methodology page), <span class="mono">/about</span> (team, data policy, licenses).</li>
+            <li>MapLibre style: dark base + GIBS <span class="mono">VIIRS_SNPP_CorrectedReflectance_TrueColor</span> and <span class="mono">MODIS_Terra_Thermal_Anomalies_All</span> raster sources; tiles fail silently to the dark base style.</li>
+            <li>Component tree fixed here and never re-litigated: <span class="mono">AoiSwitcher / CalendarGrid / YearScrubber / AnomalyLegend / EventCards / ReportPanel / MapPane</span>.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Scaffold Next.js 14 app-router with <span class="mono">output: &lsquo;export&rsquo;</span>, Tailwind off, plain CSS modules, dark theme tokens #070B14/#0E1626/#38BDF8/#E7EEF9, font Space Grotesk + JetBrains Mono via Google Fonts. Build the component tree [list above] with typed props and stub bodies reading from <span class="mono">/products/{aoi}/calendar.json</span> at build time (statically generate <span class="mono">/explore/[aoi]</span> from the 12 AOI ids via generateStaticParams). Add MapLibre via <span class="mono">maplibre-gl</span> with the GIBS raster source and graceful onError fallback. Print the exact commands to run and deploy.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Preview URL loads all four routes; Lighthouse performance &ge; 90 on <span class="mono">/</span>; switching AOI refetches products and re-renders without errors.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P4: shell deployed &mdash; preview URL live, map tiles on&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P5</span><span class="ph-name">Calendar hero &mdash; the 90-second screen</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The signature artifact: a 25-year &times; 52-week heatmap per AOI &mdash; GitHub-contribution style but for fire &mdash; with year scrubber, tooltips (FAI, detections by sensor, FRP), anomaly pulsing at <span class="mono">|z| &ge; 2</span>, and the climatology baseline drawn beneath. This screen alone can carry the demo.</p>
+        <ul>
+            <li>Render as SVG cells (25 &times; 52 &asymp; 1,300 rects &mdash; trivial for the DOM); color scale from cool dark to amber/red on FAI percentile; anomaly cells get a cyan ring + pulse animation.</li>
+            <li>Tooltip on hover: date band, FAI, z, MODIS vs VIIRS-equivalent counts, top FRP day; the scrubber snaps to ISO weeks and syncs the map pane below to that week&rsquo;s detections layer.</li>
+            <li>One-click &ldquo;share this week&rdquo; copies a state URL (<span class="mono">?aoi=&amp;week=</span>) &mdash; judges paste it into their own browser and land exactly on the evidence.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Build <span class="mono">CalendarGrid</span> as pure SVG from calendar.json + clim.json: rows years, cols ISO weeks; fill from FAI percentile; ring+pulse where |z|&ge;2; hover tooltip component; YearScrubber + week sync via URL search params; share button copying the state URL. Accessibility: aria-labels per cell with week, year, and status; keyboard-focusable cells. No chart libraries.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> The 2019&ndash;20 Australian summer anomaly is visibly pulsing on first load of that AOI; tooltip data matches events.json; demo runs offline from committed products.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P5: hero live &mdash; 25 years, one glance, honest math&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P6</span><span class="ph-name">Region explorer &mdash; depth behind the hero</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The drill-down that converts wow into credibility: per-AOI panels with top event cards (EONET-titled), fire-weather context from POWER climatology, and the cached build-time fire-season narrative &mdash; plus the sensor-contribution strip showing MODIS-era vs VIIRS-era provenance per season.</p>
+        <ul>
+            <li>Event cards from <span class="mono">events.json</span>: period, peak FAI, z, FRP sum, EONET title link, and &ldquo;view in calendar&rdquo; deep link to the exact week.</li>
+            <li>Report panel: static narrative JSON generated pre-event in the operator&rsquo;s chat window (build-time AI, cached) &mdash; 120 words per AOI on typical fire season, worst years, and what the z-anomalies marked.</li>
+            <li>Provenance strip: for each year, the fraction of the record that is measured MODIS, measured VIIRS, and k-scaled MODIS &mdash; the honesty bar rendered as a UI element.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (FRONTEND SESSION).</b> &ldquo;Build <span class="mono">ReportPanel</span> and <span class="mono">EventCards</span> from events.json + reports.json: card list with deep links to calendar state; provenance strip as a stacked horizontal bar (measured-MODIS / k-scaled / measured-VIIRS per year) from meta.json; all copy strings in a single <span class="mono">strings.ts</span> file for the i18n pass later.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> All 12 AOIs render full panels with zero console errors; every event card&rsquo;s deep link opens the calendar at the correct week.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P6: depth shipped &mdash; provenance visible, events citable&rdquo;</div>
+</div>

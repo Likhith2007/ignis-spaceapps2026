@@ -1,0 +1,72 @@
+<!-- ============ S4 DATA PRODUCTS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 04 // DATA PRODUCTS</div>
+    <div class="sec-title">Twelve Windows on the Fire World, Five Files Each</div>
+    <p class="sec-lede">The app renders committed JSON &mdash; nothing else. Here is the complete catalog.</p>
+</div>
+
+<p class="body-text">Twelve preset AOIs give the product its global voice &mdash; Amazon, Congo Basin, Borneo&ndash;Sumatra, Southeast Australia, California, the Mediterranean, Central Siberia, Central India, the Sahel, boreal Canada, the Pantanal, and a Global aggregate &mdash; each a fixed bounding box small enough that twenty-five years of detections fit in a few megabytes. Per AOI the pipeline writes five files: <span class="mono">calendar.json</span> (years &times; 52 ISO weeks of FAI plus z-scores &mdash; the hero grid), <span class="mono">clim.json</span> (the 2003&ndash;2019 week-of-year baseline), <span class="mono">events.json</span> (clustered top fire events with FRP sums and EONET cross-references), and <span class="mono">meta.json</span> (lineage: source URLs, pull dates, the k-table, license notes); a fifth file, <span class="mono">reports.json</span>, carries the build-time narrative summaries generated pre-event in the operator&rsquo;s chat window. A global <span class="mono">manifest.json</span> lists every file, its size, and its commit &mdash; and the build script enforces the budget: <b>&le;5 MB per product, &le;40 MB total</b>, or the workflow fails rather than shipping bloat.</p>
+
+<table>
+    <colgroup><col style="width:20%"><col style="width:44%"><col style="width:36%"></colgroup>
+    <thead><tr><th>PRODUCT FILE</th><th>CONTENT</th><th>BUDGET &amp; CONSUMER</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">calendar.json</td><td>Per AOI: rows = years 2000&ndash;present, cols = ISO weeks; FAI value + z-score + detection counts by sensor</td><td>&le;1 MB; the Calendar hero screen</td></tr>
+        <tr><td class="mono">clim.json</td><td>Week-of-year baseline mean/std per AOI from 2003&ndash;2019</td><td>&le;100 KB; anomaly rendering, forecast panel</td></tr>
+        <tr><td class="mono">events.json</td><td>Clustered events: centroid, period, peak FAI, FRP sum, nearest EONET title</td><td>&le;1 MB; explorer cards, report panels</td></tr>
+        <tr><td class="mono">meta.json + manifest</td><td>Lineage (sources, dates, k-table, FAI constants), file manifest with sizes</td><td>&le;100 KB; methodology page footer</td></tr>
+    </tbody>
+</table>
+
+<!-- ============ P0 ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTIONS 05&ndash;14 // THE TEN PORTIONS</div>
+    <div class="sec-title">P0 Setup &bull; P1 Ingest &bull; P2 Harmonize</div>
+    <p class="sec-lede">Foundation portions: accounts armed, data flowing, science proven &mdash; before any UI exists.</p>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P0</span><span class="ph-name">Mission Setup &mdash; accounts, repo, CI, secrets</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A public GitHub repo with the three workflows stubbed and green, a FIRMS MAP_KEY and Earthdata login in encrypted secrets, Vercel/Netlify connected for preview deploys, and a Telegram bot token issued &mdash; the entire $0 infrastructure standing before any science.</p>
+        <ul>
+            <li>Register FIRMS MAP_KEY (firms.modaps.eosdis.nasa.gov &rarr; API map key) and an Earthdata account; store both as Actions secrets: <span class="mono">FIRMS_MAP_KEY</span>, <span class="mono">EARTHDATA_USER</span>, <span class="mono">EARTHDATA_PASS</span>.</li>
+            <li>Create public repo <span class="mono">pyrochron</span>; enable Actions; paste the three stub workflows (echo job) from the bootstrap prompt below.</li>
+            <li>Create the Telegram bot via BotFather; store <span class="mono">TELEGRAM_TOKEN</span> and your chat id as secrets; connect repo to Vercel or Netlify for branch previews.</li>
+            <li>Create <span class="mono">deviations.md</span>, <span class="mono">parking-lot.md</span>, and the issue template that doubles as the task-card format.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write three minimal GitHub Actions workflow YAMLs for a public repo: <span class="mono">ingest.yml</span> (cron every 6 hours + workflow_dispatch), <span class="mono">products.yml</span> (workflow_run after ingest), <span class="mono">alerts.yml</span> (workflow_run after products). Each has one placeholder step echoing &lsquo;P0 stub&rsquo;. Add comments citing that cron requires a public repo on the free plan. Python 3.11, ubuntu-latest, concurrency group per workflow.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> All three workflows show green on their first run; a test Telegram message arrives via a curl from your machine using the token.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P0: infrastructure armed &mdash; 3 workflows green, secrets stored, bot live&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P1</span><span class="ph-name">Ingest &mdash; archive spine + NRT heartbeat</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/ingest_archive.py</span> and <span class="mono">scripts/ingest_nrt.py</span> run inside Actions: the archive script loads the pre-event per-AOI CSVs (committed under <span class="mono">data/archive/</span>) into unified parquet; the NRT script pulls the last days from the FIRMS API for all 12 AOIs with retry + backoff and appends a parquet delta.</p>
+        <ul>
+            <li><b>Pre-event (manual, one evening):</b> export archive CSVs per AOI per sensor from the FIRMS Archive Download Tool with Earthdata auth; commit under <span class="mono">data/archive/{aoi}/</span> (bounded boxes keep files small; gzip if needed).</li>
+            <li>Unified schema on load: <span class="mono">date, lat, lon, sensor, satellite, frp_mw, conf_raw, daynight</span>; drop exact duplicates; QA row counts vs FIRMS portal numbers for one known month.</li>
+            <li>NRT script reads <span class="mono">FIRMS_MAP_KEY</span> from env only; loop AOIs; sleep politely between calls; write <span class="mono">data/nrt/latest.parquet</span> + a run summary to the workflow log.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">ingest_nrt.py</span>: for each AOI bbox in <span class="mono">aois.json</span>, GET the FIRMS area CSV URL pattern for sources MODIS_NRT, VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT with DAY_RANGE at the documented cap, MAP_KEY from env FIRMS_MAP_KEY. Tenacity retry (5 tries, exponential backoff). Parse CSV to pandas with columns latitude, longitude, bright_ti4/scan, acq_date, acq_time, satellite, instrument, confidence, frp, daynight; map to the unified schema; concat, dedupe, save parquet. Print row counts per source. Style: stdlib + pandas + requests only.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Manual dispatch of <span class="mono">ingest.yml</span> produces <span class="mono">latest.parquet</span> as an artifact with plausible counts (e.g., tens of thousands of global detections per day band) and zero dropped AOIs.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P1: data flows &mdash; archive spine loaded, NRT heartbeat green&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P2</span><span class="ph-name">Harmonize &mdash; the science, executed in CI</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> <span class="mono">scripts/harmonize.py</span> implements Section 03 end to end in CI: confidence remap, overlap calibration k-table, FAI grid, weekly calendar, climatology, z-scores, event clustering, and the MCD64A1 validation coefficient &mdash; writing its outputs into <span class="mono">data/interim/</span> for P3 to package.</p>
+        <ul>
+            <li>Implement exactly the pseudocode in Section 03; keep every constant (Q-bands, k floor, &alpha;, &beta;, baseline window, DBSCAN params) in a single <span class="mono">CONFIG</span> dict at the top &mdash; the methodology page will render this dict verbatim.</li>
+            <li>Log the calibration table (month &rarr; k per region) and the per-AOI Pearson r to the workflow log; fail the workflow if r &lt; 0.6 for the Global AOI (quality gate).</li>
+            <li>Plot nothing, print everything &mdash; logs are the audit trail; artifacts carry the interim parquets.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Implement <span class="mono">harmonize.py</span> from this spec verbatim [paste Section 03 pseudocode block]. Inputs: parquets from P1 under data/. Use pandas, numpy, scipy.stats.pearsonr, sklearn.cluster.DBSCAN. CONFIG dict first; pure functions after; main() orchestrates and prints the calibration table and r-values. No plotting libraries.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> Products job green with a printed k-table in a plausible range (1.0&ndash;4.0, seasonally varying) and Global r &ge; 0.6; spot-check one known extreme week (e.g., 2019&ndash;20 Australian summer) shows |z| &gt; 2 in the interim output.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P2: two sensors, one calendar &mdash; r=0.6x on Global&rdquo;</div>
+</div>

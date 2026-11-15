@@ -1,0 +1,57 @@
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P7</span><span class="ph-name">Automation &amp; alerts &mdash; the app that never sleeps</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> The living system: every 6 hours CI refreshes the fire record, rebuilds products, republishes the site, and posts a Telegram digest; when a preset AOI&rsquo;s latest week crosses <span class="mono">|z| &ge; 2.5</span>, a threshold alarm fires with a deep link. This is the &ldquo;early warning&rdquo; verb of the brief, executed &mdash; and the automation showcase for the Best-Use-of-Technology eye.</p>
+        <ul>
+            <li>Wire <span class="mono">alerts.yml</span>: after products, run <span class="mono">scripts/alert_digest.py</span> &mdash; reads the newest <span class="mono">calendar.json</span> set, formats the digest (top 3 AOIs by latest-week FAI, any |z|&ge;2.5 flags), sends via Telegram Bot API from secrets.</li>
+            <li>Deploy hook: the products commit already triggers hosting; verify end-to-end latency (ingest &rarr; live site) under 15 minutes and note it in the methodology page &mdash; a judge-checkable claim.</li>
+            <li>Add <span class="mono">BOT.md</span>: how the bot behaves, how to subscribe (public channel), and the exact thresholds &mdash; transparency for the judges and a demo-able artifact.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (DATA SESSION).</b> &ldquo;Write <span class="mono">alert_digest.py</span>: load products/*/calendar.json, take last complete ISO week per AOI, compute FAI percentile within that AOI&rsquo;s history, build a digest message (plain text, emoji-free) listing top AOIs and |z|&ge;2.5 alarms with the site&rsquo;s state URL; POST to Telegram <span class="mono">sendMessage</span> using env TELEGRAM_TOKEN and TELEGRAM_CHAT_ID. requests only, no external deps.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> A real digest message arrives on the operator&rsquo;s phone within minutes of a manual products run; the alarm deep link opens the app at the flagged AOI and week.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P7: pipeline alive &mdash; 6h cadence, alarms wired, latency logged&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P8</span><span class="ph-name">QA &amp; polish &mdash; judge-proofing</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A submission that survives hostile review: zero console errors on every route, mobile-clean layout, accessibility pass, six-language static strings, and a methodology page that carries the calibration table, FAI constants, validation r-values, and limitations verbatim from <span class="mono">meta.json</span>.</p>
+        <ul>
+            <li>QA session drives the deployed preview via Playwright MCP: snapshot every route at desktop and mobile widths, capture screenshots, assert no error toasts, check focus order and aria-labels on the calendar grid.</li>
+            <li>i18n-lite: <span class="mono">strings.ts</span> expanded to EN/ES/FR/PT/HI/ID static translations (chat assistants translate; strings are short UI copy only) with a language switcher persisted in localStorage.</li>
+            <li>Methodology page rendered from <span class="mono">meta.json</span> + prose: pipeline diagram, k-table, FAI equation, r-values, limitations &mdash; the Best-Use-of-Science exhibit.</li>
+        </ul>
+        <p><b>PROMPT RECIPE (QA SESSION).</b> &ldquo;Using the Playwright MCP tools against [preview URL]: navigate all routes, take accessibility snapshots and screenshots at 1440px and 390px, list any console errors, missing aria-labels, or overflow; produce a ranked fix list with file paths. Then translate strings.ts to ES/FR/PT/HI/ID keeping UI copy under 40 characters per string.&rdquo;</p>
+        <p><b>ACCEPTANCE.</b> QA checklist green on all routes and widths; the methodology page shows the same k-table and r-values the CI logs printed in P2 &mdash; numbers that agree across artifacts.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P8: judge-proof &mdash; QA green, 6 languages, method page live&rdquo;</div>
+</div>
+
+<div class="phase">
+    <div class="phase-head"><span class="ph-time">P9</span><span class="ph-name">Deploy &amp; submit &mdash; video, page, checklist</span></div>
+    <div class="phase-body">
+        <p><b>GOAL.</b> A complete Space Apps submission: 3-minute video following the storyboard below, project page fields filled to sell the lanes, repo README rebuilt for judges, and the submission checklist ticked in order &mdash; submitted with hours to spare, not minutes.</p>
+        <ul>
+            <li>Video: screen-record the demo path (hero &rarr; anomaly &rarr; drill-down &rarr; methodology &rarr; bot message on phone), narrate with the script from the storyboard table, cut to 3:00 hard limit, captions burned in.</li>
+            <li>Project page: one-paragraph summary, the judge&rsquo;s 90-second demo path, data sources list with links, award-lane statement, team and tools (chat-assisted build disclosed proudly &mdash; Space Apps celebrates AI use).</li>
+            <li>README: repository map, replay-the-pipeline instructions (three workflow dispatches), license and NASA data policy notes.</li>
+        </ul>
+        <p><b>ACCEPTANCE.</b> Submission form complete with video link, demo URL, repo URL; the checklist below fully ticked; a fresh anonymous browser can run the 90-second demo path without guidance.</p>
+    </div>
+    <div class="phase-gate">COMMIT: &ldquo;P9: submitted &mdash; video 3:00, page complete, checklist green&rdquo;</div>
+</div>
+
+<div class="sub-title"><span class="num">P9.1</span> The 3-Minute Video &mdash; Shot-by-Shot Storyboard</div>
+<table>
+    <colgroup><col style="width:12%"><col style="width:34%"><col style="width:30%"><col style="width:24%"></colgroup>
+    <thead><tr><th>TIME</th><th>SHOT</th><th>ON SCREEN</th><th>NARRATION BEAT</th></tr></thead>
+    <tbody>
+        <tr><td class="mono">0:00&ndash;0:20</td><td>Cold open on the hero calendar</td><td>25-year grid, scrubber sweeping, anomalies pulsing</td><td>&ldquo;Since 2000, two NASA sensors have watched Earth burn &mdash; and never spoken the same language.&rdquo;</td></tr>
+        <tr><td class="mono">0:20&ndash;0:50</td><td>The seam, visualized</td><td>Split: raw MODIS vs raw VIIRS counts for one region</td><td>&ldquo;VIIRS sees smaller fires; MODIS saw twenty extra years. Naively stacked, the record lies.&rdquo;</td></tr>
+        <tr><td class="mono">0:50&ndash;1:30</td><td>Harmonization explained</td><td>k-table, FAI equation, baseline window on the method page</td><td>&ldquo;We measured the gap on the overlap years and built one calendar &mdash; validated against burned-area truth.&rdquo;</td></tr>
+        <tr><td class="mono">1:30&ndash;2:10</td><td>Region drill-down</td><td>2019&ndash;20 Australia anomaly; event cards with EONET titles; provenance strip</td><td>&ldquo;Every spike is citable, every number carries its lineage, every AOI has a report.&rdquo;</td></tr>
+        <tr><td class="mono">2:10&ndash;2:40</td><td>Living system</td><td>Actions workflow running; Telegram digest arriving on a phone</td><td>&ldquo;Every six hours the pipeline refreshes itself &mdash; and alerts when a fire week breaks the baseline.&rdquo;</td></tr>
+        <tr><td class="mono">2:40&ndash;3:00</td><td>Close on the mission</td><td>Global AOI, calendar zoom-out, team card</td><td>&ldquo;One calendar, twenty-five years, every corner of Earth. Built from NASA&rsquo;s open data &mdash; for the people in fire&rsquo;s path.&rdquo;</td></tr>
+    </tbody>
+</table>

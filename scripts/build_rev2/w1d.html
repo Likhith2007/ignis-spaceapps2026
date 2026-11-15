@@ -1,0 +1,45 @@
+<!-- ============ S4 MODEL STRATEGY ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 04 // MODEL STRATEGY REV 2</div>
+    <div class="sec-title">From Model Registry to Method Registry</div>
+    <p class="sec-lede">Every REV 1 model task gets a deterministic substitute or a hosted one-shot &mdash; nothing in the critical path needs weights we own.</p>
+</div>
+
+<p class="body-text">REV 1&rsquo;s AI division assumed a local Hugging Face registry: Chronos-Bolt for forecast, Prithvi-EO for downstream Earth observation, an embedding model for retrieval, an LLM service for briefing generation. Under the chat-only constraint that entire registry is retired &mdash; and the honest engineering answer is that the flagship never needed it. The scientific work judges reward in the fire brief is <b>calibration and climatology arithmetic</b>: z-scores against a 20-year baseline, seasonal decomposition, a transfer function between two sensors. That is a hundred lines of NumPy, fully reproducible in CI, and more defensible in front of a judge than a black-box forecast. Models return only where they add demonstrable value at zero operational risk: build-time narrative generation and an optional hosted forecast flourish.</p>
+
+<div class="sub-title"><span class="num">04.1</span> The Replacement Matrix</div>
+<table>
+    <colgroup><col style="width:26%"><col style="width:20%"><col style="width:34%"><col style="width:20%"></colgroup>
+    <thead><tr><th>REV 1 PLAN (LOCAL)</th><th>REV 2 SUBSTITUTE</th><th>HOW IT WORKS</th><th>RUNTIME RISK</th></tr></thead>
+    <tbody>
+        <tr><td>Chronos-Bolt forecast microservice</td><td><b>Climatology z-score + STL</b> in Python (CI)</td><td>Season-trend decomposition per AOI week-of-year; 4-week outlook as climatology-plus-trend projection</td><td>None &mdash; pure code, runs in Actions</td></tr>
+        <tr><td>Prithvi-EO downstream tasks</td><td><b>Dropped</b> &mdash; not needed</td><td>FIRMS points + MCD64A1 burned area cover the brief; no imagery classification required</td><td>None</td></tr>
+        <tr><td>LLM briefing generator service</td><td><b>Build-time narratives, cached</b></td><td>Chat assistants write per-AOI fire-season reports during the build; shipped as static JSON &mdash; zero runtime cost, zero hallucination risk at demo</td><td>None</td></tr>
+        <tr><td>Embeddings + local RAG</td><td><b>HF Inference Providers free tier</b> (optional)</td><td>A few hundred requests/hour on &lt;10B models; reserved for the #08 reserve brief&rsquo;s Q&amp;A demo if activated</td><td>Low &mdash; decorative only</td></tr>
+        <tr><td>FastAPI micro-services</td><td><b>1 stateless serverless proxy</b></td><td>Single function for live NRT passthrough with caching; everything else static</td><td>Low &mdash; one function</td></tr>
+        <tr><td>Chronos demo flourish (stretch)</td><td><b>Hosted Chronos via HF serverless</b></td><td>If free-tier quota allows on demo day, a live &ldquo;next 4 weeks&rdquo; call; UI degrades gracefully to climatology view when quota is dry</td><td>Low &mdash; has fallback</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">IRON RULES // MODELS UNDER CHAT-ONLY CONSTRAINTS</div>
+    <b>Rule 1:</b> No model in the critical path &mdash; if a hosted call fails, every screen still renders. <b>Rule 2:</b> Every &ldquo;AI feature&rdquo; ships with its deterministic twin visible in the UI (the judge sees the honest method by default). <b>Rule 3:</b> All build-time generation happens in the operator&rsquo;s chat windows before the event, never live at the podium.
+</div>
+
+<!-- ============ S5 INFRASTRUCTURE ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 05 // INFRASTRUCTURE DECISIONS</div>
+    <div class="sec-title">Public Repo, Static Products, Zero Dollars</div>
+    <p class="sec-lede">Five decisions made now so that no hour of the event is spent making them.</p>
+</div>
+
+<p class="body-text"><b>Decision 1 &mdash; the repository is public.</b> Scheduled GitHub Actions workflows do not run on private repositories under the free plan, and the entire automation layer depends on cron; a public repo also gives judges the replayable-pipeline transparency described above. The cost is secret hygiene: MAP_KEY, Telegram token, and Resend key live only in <b>encrypted Actions secrets</b>, never in client code, never in logs, and the NRT proxy reads its key server-side so the browser never sees one. <b>Decision 2 &mdash; scheduling belongs to Actions, not the host.</b> Hosting-platform cron on free tiers is limited and opaque; the build uses Actions for every schedule and a deploy hook for publication, so the pipeline and the schedule live in the same reviewable YAML.</p>
+
+<p class="body-text"><b>Decision 3 &mdash; data products are static JSON committed to the repo.</b> Each product file stays under 5 MB and the full set under 40 MB, which keeps git fast, deploys instant, and the app entirely CDN-served; size budgets are enforced by the build script so no portion can silently bloat the repo. <b>Decision 4 &mdash; the front-end is a static export</b> (Next.js static export or Vite) with exactly one serverless function for live NRT passthrough &mdash; deployable to Vercel or Netlify hobby plans with preview URLs per branch, which is what the Playwright QA loop tests against. <b>Decision 5 &mdash; every external call has a static fallback:</b> basemap tiles from GIBS fail gracefully to a plain dark style, the live proxy fails to the last committed product, and the demo script never depends on a fresh API response. The cumulative result is a submission whose failure surface is close to zero and whose running cost is exactly zero.</p>
+
+<div class="stat-row">
+    <div class="stat"><div class="v">$0</div><div class="k">TOTAL INFRA COST / MONTH</div></div>
+    <div class="stat"><div class="v">1</div><div class="k">SERVERLESS FUNCTION, TOTAL</div></div>
+    <div class="stat"><div class="v">3</div><div class="k">GITHUB ACTIONS WORKFLOWS</div></div>
+    <div class="stat"><div class="v">&le;40MB</div><div class="k">ALL DATA PRODUCTS, COMMITTED</div></div>
+</div>

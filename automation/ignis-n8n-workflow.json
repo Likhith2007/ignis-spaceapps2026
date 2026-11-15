@@ -1,0 +1,137 @@
+{
+  "name": "IGNIS — Daily Wildfire Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24 }]
+        }
+      },
+      "id": "a1-schedule",
+      "name": "Every 24h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-360, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://ignis-spaceapps2026.vercel.app/api/hooks/digest",
+        "options": { "timeout": 30000 },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.IGNIS_HOOK_TOKEN || '' }}" }
+          ]
+        }
+      },
+      "id": "a2-digest",
+      "name": "Fetch IGNIS digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-140, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "combinator": "or",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.alertRegions.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            },
+            {
+              "leftValue": "={{ $json.gdacs.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3-filter",
+      "name": "Only if fires need attention",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [80, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst lines = [];\nlines.push('IGNIS daily wildfire digest — ' + d.day);\nlines.push('');\nfor (const r of d.alertRegions) {\n  lines.push('• ' + r.name + ': ' + r.detections + ' detections, ' + r.frpMW + ' MW FRP, ' + r.extreme + ' EXTREME / ' + r.high + ' high-threat → ' + r.link);\n}\nif (d.gdacs && d.gdacs.length) {\n  lines.push('');\n  lines.push('GDACS authority alerts:');\n  for (const g of d.gdacs) lines.push('• [' + g.alertLevel + '] ' + g.title + ' (' + g.country + ') → ' + g.url);\n}\nreturn [{ json: { text: lines.join('\\n'), headline: d.headline } }];"
+      },
+      "id": "a4-format",
+      "name": "Format message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "b1", "name": "subject", "value": "={{ 'IGNIS fire digest ' + $json.headline.slice(0, 80) }}", "type": "string" },
+            { "id": "b2", "name": "body", "value": "={{ $json.text }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5-fields",
+      "name": "Set email fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [520, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "ignis@example.com",
+        "toEmail": "you@example.com",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "a6-email",
+      "name": "Send email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [740, -100],
+      "webhookId": "ignis-digest-email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "path": "ignis-fires",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "a7-telegram",
+      "name": "Telegram (replace with node)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [740, 120],
+      "notes": "Swap this webhook node for n8n-nodes-base.telegram (chatId + text = {{ $json.body }}) or a Slack node — both are drop-in."
+    }
+  ],
+  "connections": {
+    "Every 24h": { "main": [[{ "node": "Fetch IGNIS digest", "type": "main", "index": 0 }]] },
+    "Fetch IGNIS digest": { "main": [[{ "node": "Only if fires need attention", "type": "main", "index": 0 }]] },
+    "Only if fires need attention": { "main": [[{ "node": "Format message", "type": "main", "index": 0 }]] },
+    "Format message": { "main": [[{ "node": "Set email fields", "type": "main", "index": 0 }]] },
+    "Set email fields": {
+      "main": [
+        [
+          { "node": "Send email", "type": "main", "index": 0 },
+          { "node": "Telegram (replace with node)", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": {
+    "instanceId": "ignis-spaceapps-2026",
+    "description": "IGNIS daily wildfire digest for n8n (github.com/n8n-io/n8n). Self-host n8n (docker run -it --rm -p 5678:5678 n8nio/n8n), import this file, set your email/Telegram credentials, optionally point the digest URL at your own deployment and set IGNIS_HOOK_TOKEN on both sides."
+  },
+  "tags": ["ignis", "nasa-space-apps-2026", "wildfire", "early-alert"]
+}

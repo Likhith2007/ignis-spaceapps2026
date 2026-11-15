@@ -1,0 +1,58 @@
+
+<!-- ============ S1 CREDENTIAL ARSENAL ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 01 // THE CREDENTIAL ARSENAL</div>
+    <div class="sec-title">Every Key, Its Budget, Its Home</div>
+    <p class="sec-lede">Registering the full arsenal with fingerprints only &mdash; real values never appear in any document, only in the private vault.</p>
+</div>
+
+<p class="body-text">Six credential systems now back the build. Each one is registered below with its role in the architecture, its observed rate budget, and its storage location. The canonical store is <b>secrets.env</b> inside the private vault repository; the runtime store is GitHub <b>encrypted Actions secrets</b> on whichever repository runs automation. No key will ever be embedded in application code, pasted into a chat session, or printed in a document &mdash; the fingerprints shown here (last four characters) exist only so the operator can visually confirm which value is loaded at runtime.</p>
+
+<table>
+    <colgroup><col style="width:21%"><col style="width:26%"><col style="width:19%"><col style="width:20%"><col style="width:14%"></colgroup>
+    <thead><tr><th>SYSTEM</th><th>ROLE IN THE BUILD</th><th>OBSERVED BUDGET</th><th>STORED AS</th><th>FINGERPRINT</th></tr></thead>
+    <tbody>
+        <tr><td><b>FIRMS MAP_KEY</b></td><td>Active-fire pulls (MODIS + VIIRS, NRT + science), WMS fire overlay, 20+ yr history</td><td>5,000 txn / 10 min; 0 in use</td><td>secrets.env + Actions secret</td><td class="mono">&hellip;ccf3</td></tr>
+        <tr><td><b>api.nasa.gov key</b></td><td>APOD, EPIC, DONKI, NeoWs, Earth, TLE, SSD/CNEOS &mdash; narrative + space-weather feeds</td><td>10,000 / hr observed</td><td>secrets.env + Actions secret</td><td class="mono">&hellip;hZ45</td></tr>
+        <tr><td><b>Earthdata JWT</b></td><td>Authorized CMR search, ASF/LAADS access paths, NISAR visibility (exp into Nov 2026)</td><td>CMR 200 OK verified</td><td>secrets.env (runner env on use)</td><td class="mono">&hellip;vsw</td></tr>
+        <tr><td><b>GitHub PAT</b></td><td>Repo automation, Actions dispatch, encrypted secrets, Pages deploys</td><td>5,000 req / hr REST</td><td>secrets.env (never in repos)</td><td class="mono">&hellip;esqm</td></tr>
+        <tr><td><b>HF fine-grained token</b></td><td>Private data-cache repo, gated model reads, optional serverless inference</td><td>free tier; write+inference scopes</td><td>secrets.env + Actions secret</td><td class="mono">&hellip;AwtF</td></tr>
+        <tr><td><b>Keyless services</b></td><td>GIBS WMTS tiles, EONET v3, NASA POWER, USGS, Open-Meteo &mdash; no registration, no key</td><td>civil-use fair limits</td><td>nothing to store</td><td class="mono">&mdash;</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">ROTATION DOCTRINE // NON-NEGOTIABLE</div>
+    Every credential in this table was transmitted through chat in plaintext. That is acceptable <b>only</b> as a one-time arming event. On <b>Nov 16, 2026</b> (the day after the event) rotate all of them: regenerate the GitHub PAT, the HF token, both NASA keys, the FIRMS MAP_KEY, and the Earthdata password, then update secrets.env. If any key ever appears in a public place before then, rotate it within the hour. The vault README carries this policy so it survives even if this PDF is lost.
+</div>
+
+<!-- ============ S2 LIVE VERIFICATION LOG ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 02 // LIVE VERIFICATION LOG</div>
+    <div class="sec-title">What Was Actually Proven, With Actual Numbers</div>
+    <p class="sec-lede">2026-09-20, 19:59&ndash;20:10 UTC &mdash; every claim below has a recorded response.</p>
+</div>
+
+<p class="body-text">Verification was executed in two environments, and the split itself is informative. The local sandbox reached four of five NASA hosts but could not route to <span class="mono">firms.modaps.eosdis.nasa.gov</span> &mdash; its DNS resolves to 198.118.194.34 from every resolver including public DoH, and TCP 443 times out; this is an egress restriction of the sandbox network, not a property of the key. The definitive FIRMS test therefore ran where production automation will actually run: on a GitHub Actions runner, triggered by API, reading the key from an encrypted secret. That run succeeded, which simultaneously validated the key, the secret mechanism, and the workflow corridor in one stroke.</p>
+
+<table>
+    <colgroup><col style="width:24%"><col style="width:12%"><col style="width:64%"></colgroup>
+    <thead><tr><th>TEST</th><th>RESULT</th><th>EVIDENCE RECORDED</th></tr></thead>
+    <tbody>
+        <tr><td><b>api.nasa.gov APOD</b></td><td class="mono">HTTP 200</td><td>2026-09-20 image returned; headers <span class="mono">x-ratelimit-limit: 10000, remaining: 9998</span></td></tr>
+        <tr><td><b>EONET v3 open events</b></td><td class="mono">HTTP 200</td><td>98 open events in 30-day window; e.g. EONET_24483 wildfire, Starr County TX, 500 acres, IRWIN source</td></tr>
+        <tr><td><b>GIBS WMTS tile</b></td><td class="mono">HTTP 200</td><td>MODIS_Terra TrueColor 2026-09-19 z3 &rarr; 23,625 bytes, anonymous</td></tr>
+        <tr><td><b>CMR + Earthdata JWT</b></td><td class="mono">HTTP 200</td><td>Authorized search returns <span class="mono">NISAR_L2_GCOV_PROVISIONAL_V1</span> (ASF, cloud-hosted, data since 2025-10-28)</td></tr>
+        <tr><td><b>CMR anonymous</b></td><td class="mono">HTTP 200</td><td><span class="mono">VNP14IMG_002</span> VIIRS active-fire L2 confirmed since 2012-01-17</td></tr>
+        <tr><td><b>GitHub identity</b></td><td class="mono">HTTP 200</td><td>login Hisernberg; scopes include repo, workflow, delete_repo, admin:repo_hook</td></tr>
+        <tr><td><b>HF whoami-v2</b></td><td class="mono">HTTP 200</td><td>user Nabidnur; fine-grained &ldquo;new-nasa&rdquo;; gated reads + <span class="mono">inference.serverless.write</span></td></tr>
+        <tr><td><b>FIRMS status (runner)</b></td><td class="mono">RUN SUCCESS</td><td><span class="mono">{ transaction_limit: 5000, current_transactions: 0, interval: 10 minutes }</span></td></tr>
+        <tr><td><b>FIRMS real pull (runner)</b></td><td class="mono">RUN SUCCESS</td><td>Detection <span class="mono">38.01482,&minus;122.11292 &middot; VIIRS SNPP &middot; 2026-09-19 &middot; conf n &middot; FRP 1.32</span></td></tr>
+        <tr><td><b>POWER series pull (local)</b></td><td class="mono">PASS</td><td>Fresno AOI 578 days T2M + PRECTOTCORR &rarr; JSON (PULSE pipeline proven keyless)</td></tr>
+    </tbody>
+</table>
+
+<div class="callout">
+    <div class="co-tag">BONUS FINDING // NISAR IS ALREADY PUBLIC-FACING</div>
+    The authorized CMR search returned <b>provisional NISAR L2 GCOV products</b> flowing since 2025-10-28 via ASF. This materially upgrades the fallback posture for Dancing with the SARs (#6): the pivot option is no longer theoretical. The Earthdata JWT can search NISAR granules today, and ASF profile activation (Section 04) would enable downloads within minutes if the portfolio ever shifts.
+</div>

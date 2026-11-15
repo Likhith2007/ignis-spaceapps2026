@@ -1,0 +1,62 @@
+<!-- ============ S3 AI-NATIVE OS ============ -->
+<div class="chapter-header">
+    <div class="sec-tag">SECTION 03 // THE AI-NATIVE OPERATING SYSTEM</div>
+    <div class="sec-title">Three Layers: Chat Protocol, MCP, Automation</div>
+    <p class="sec-lede">The substitute for a team, a toolchain, and a server room &mdash; in that order.</p>
+</div>
+
+<div class="arch">
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER A // HUMAN-CHAT CODING PROTOCOL</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">DATA SESSION</div><div class="d">ingest, harmonize, products &mdash; Python + CI</div></div>
+            <div class="arch-node"><div class="n">FRONTEND SESSION</div><div class="d">Next.js, MapLibre, calendar UI</div></div>
+            <div class="arch-node"><div class="n">QA SESSION</div><div class="d">Playwright checks, docs, pitch copy</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; commits &amp; issues as shared memory</span><span>&#9660;&nbsp; tasks via MCP / CLI</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER B // MCP TOOLBRIDGE</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">GITHUB MCP</div><div class="d">repos, issues, PRs, Actions toolsets</div></div>
+            <div class="arch-node"><div class="n">PLAYWRIGHT MCP</div><div class="d">a11y snapshots, screenshots, flows</div></div>
+            <div class="arch-node"><div class="n">FETCH MCP</div><div class="d">endpoint probing, API contract checks</div></div>
+        </div>
+    </div>
+    <div class="arch-conn"><span>&#9660;&nbsp; triggers workflows</span><span>&#9660;&nbsp; deploys static products</span></div>
+    <div class="arch-layer">
+        <div class="arch-ltitle">LAYER C // CLOUD EXECUTION &mdash; WHERE WORK ACTUALLY RUNS</div>
+        <div class="arch-nodes">
+            <div class="arch-node"><div class="n">GITHUB ACTIONS</div><div class="d">cron ingest &rarr; harmonize &rarr; products &rarr; deploy</div></div>
+            <div class="arch-node"><div class="n">VERCEL / NETLIFY</div><div class="d">static hosting, preview URLs, 1 proxy fn</div></div>
+            <div class="arch-node"><div class="n">NASA APIS + TELEGRAM + RESEND</div><div class="d">FIRMS, GIBS, AppEEARS, POWER, EONET; alerts out</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="sub-title"><span class="num">03.1</span> Layer A &mdash; The Chat-Only Coding Protocol</div>
+<p class="body-text">Chat assistants have no memory of the repo, so the protocol manufactures memory out of <b>small context and hard artifacts</b>. Work is decomposed into <b>task cards</b>: a single file or single function with a stated input, output, and acceptance test, small enough that its entire context fits in one message. Each prompt carries three things &mdash; the relevant file (pasted, not described), the exact acceptance command, and the constraint list (fonts, library versions, style rules). The assistant returns code; the operator runs the acceptance command locally or pushes to CI; failures go back to the same chat with the verbatim error text pasted. One loop per task card, then commit with a conventional message. The commit history is the project&rsquo;s real memory: any fresh chat can be onboarded in thirty seconds with <span class="mono">git log --oneline</span> plus the file in question.</p>
+
+<p class="body-text">Because the operator can hold several chat tabs open, the solo build runs as <b>three standing sessions with strict jurisdictions</b>. The DATA session owns everything under <span class="mono">scripts/</span> and <span class="mono">.github/workflows/</span>; the FRONTEND session owns the app directory; the QA session owns issues, docs, and the submission kit. Sessions never edit each other&rsquo;s files &mdash; cross-cutting requests are filed as GitHub issues (via the GitHub MCP or plain web) and picked up by the owning session. This recreates the old team&rsquo;s code-review benefit at zero personnel cost: before any merge, the operator asks a second, different assistant to <b>review the diff</b> in its own window; reviewers catch hallucinated API parameters more often than any linter. That two-assistant pattern &mdash; one writes, one critiques &mdash; is the single highest-value habit in this document.</p>
+
+<div class="check">
+    <div class="check-item"><span class="bx"></span><span><b>Task card rule.</b> One file or one function per prompt; input, output, and acceptance command stated up front. If the card needs two paragraphs of context, split the card.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Error-paste rule.</b> Never paraphrase an error. Paste the verbatim stack trace plus the line of code that produced it; assistants fix real errors faster than descriptions.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Reviewer rule.</b> Every non-trivial diff gets a critique pass in a different assistant&rsquo;s window before merge. Author-assistant and reviewer-assistant must not be the same model.</span></div>
+    <div class="check-item"><span class="bx"></span><span><b>Commit rule.</b> Commit after every green acceptance test, message format <span class="mono">P{n}: {what} &mdash; {proof}</span>. The log doubles as the methodology page for judges.</span></div>
+</div>
+
+<div class="sub-title"><span class="num">03.2</span> Layer B &mdash; The MCP Toolbridge</div>
+<p class="body-text">Model Context Protocol servers are what turn a chat window into an operator console, and three of them cover the entire build. The <b>GitHub MCP server</b> (official, remote) exposes toolsets for Repos, Issues, Pull Requests, Actions, and Discussions &mdash; which means the operator can create the repo, file task cards as issues, push branches, open PRs, and read workflow logs without leaving the chat that is writing the code. The <b>Playwright MCP server</b> gives the QA session eyes: it navigates the deployed preview, captures structured accessibility snapshots, and takes screenshots on demand &mdash; that is how a solo operator runs a visual regression pass and proves console-clean rendering at 2 a.m. The <b>fetch MCP</b> probes data endpoints directly from chat &mdash; paste a FIRMS URL, get the first rows back, confirm the schema before writing a line of ingestion code.</p>
+
+<p class="body-text">The bridge also has a <b>fallback mode</b>, because hackathon Wi-Fi and tool outages are part of the game. If MCP is unavailable, every action it enables has a CLI equivalent the assistant can generate verbatim: <span class="mono">gh</span> commands for repo and workflow operations, <span class="mono">curl</span> for endpoint probes, and a fifteen-line Playwright script for screenshots. The protocol is identical &mdash; only the transport changes &mdash; and the bible in SP-2026-007 writes the fallback commands next to every MCP step so no decision ever waits on a tool.</p>
+
+<div class="callout">
+    <div class="co-tag">WHY MCP MATTERS SOLO</div>
+    A team loses one member&rsquo;s hour to tool friction and absorbs it. A solo operator loses the same hour with no one to absorb it. MCP exists in this doctrine to keep the operator&rsquo;s hands on judgment &mdash; the round trip from &ldquo;idea&rdquo; to &ldquo;merged and deployed&rdquo; must stay under ten minutes all weekend.
+</div>
+
+<div class="sub-title"><span class="num">03.3</span> Layer C &mdash; Automation and the $0 Cloud</div>
+<p class="body-text">Everything that must run, runs in GitHub Actions &mdash; free on a public repository, which the build adopts deliberately (see Section 05 for the secrets hygiene that makes a public repo safe). Three workflows carry the entire operation: <b>ingest</b> (scheduled, pulls FIRMS NRT every six hours and appends to the archive), <b>build-products</b> (recomputes harmonized JSON products on every ingest and commits them), and <b>deploy</b> (static export to Vercel or Netlify on every commit to main, with preview URLs per branch). Alerts ride out through the <b>Telegram Bot API</b> and <b>Resend</b> free tier &mdash; a daily fire digest and threshold alarms, both initiated by Actions, both needing zero infrastructure. Optional hosted inference, if any feature wants it, rides the Hugging Face Inference Providers free tier (a few hundred requests per hour, models under roughly 10B parameters) &mdash; useful for a demo flourish, forbidden in the critical path.</p>
+
+<p class="body-text">The total infrastructure bill is <b>zero dollars</b>, and more importantly the operational surface is a handful of YAML files the operator can read in one sitting. Every moving part is observable in a public place: workflow runs are browsable, artifacts are downloadable, and a judge who wants to check honesty can replay the whole pipeline from the repository. This transparency is not a consolation prize for lacking a back-end &mdash; it is the Best-Use-of-Data pitch itself.</p>
